@@ -1,0 +1,85 @@
+use std::{env, process::Command};
+
+use anyhow::{Context, Result, bail};
+
+fn main() {
+    if let Err(e) = try_main() {
+        eprintln!("{:?}", e);
+        std::process::exit(-1);
+    }
+}
+
+fn try_main() -> Result<()> {
+    let task = env::args().nth(1);
+    match task.as_deref() {
+        Some("db:up") => db_up()?,
+        Some("db:down") => db_down()?,
+        Some("run") => run()?,
+        _ => print_help(),
+    }
+    Ok(())
+}
+
+fn print_help() {
+    eprintln!(
+        "Tasks:
+
+db:up             Start development database
+db:down           Stop development database
+run               Run server crate
+    "
+    )
+}
+
+const DB_NAME: &'static str = "jpquiz-db";
+
+fn db_up() -> Result<()> {
+    run_docker(&[
+        "run",
+        "-e",
+        "POSTGRES_USER=postgres",
+        "-e",
+        "POSTGRES_PASSWORD=password",
+        "-p",
+        "127.0.0.1:5432:5432",
+        "--name",
+        DB_NAME,
+        "-d",
+        "--rm",
+        "postgres",
+        "-N",
+        "1000",
+    ])
+}
+
+fn db_down() -> Result<()> {
+    run_docker(&["stop", DB_NAME])
+}
+
+fn run_docker(cmd: &[&str]) -> Result<()> {
+    let mut out = Command::new("docker").args(cmd).spawn().context("spawn")?;
+
+    let exit = out.wait()?;
+
+    if !exit.success() {
+        bail!("non 0 exit code: {exit}");
+    }
+
+    Ok(())
+}
+
+fn run() -> Result<()> {
+    run_cargo(&["run", "-p", "server"])
+}
+
+fn run_cargo(cmd: &[&str]) -> Result<()> {
+    let mut out = Command::new("cargo").args(cmd).spawn().context("spawn")?;
+
+    let exit = out.wait()?;
+
+    if !exit.success() {
+        bail!("non 0 exit code: {exit}");
+    }
+
+    Ok(())
+}

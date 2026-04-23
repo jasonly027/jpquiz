@@ -1,0 +1,8 @@
+[workspace]
+resolver = "3"
+members = [
+    "server", "xtask",
+]
+
+[workspace.dependencies]
+anyhow = "1.0.102"

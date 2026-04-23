@@ -1,0 +1,9 @@
+application:
+  host: 127.0.0.1
+database:
+  host: localhost
+  port: 5432
+  require_ssl: false
+  user: postgres
+  password: password
+  database: jpquiz

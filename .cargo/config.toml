@@ -1,0 +1,2 @@
+[alias]
+xtask = "--quiet run -p xtask --"
