@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Display, path::PathBuf};
 
 use secrecy::{ExposeSecret, SecretString};
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
@@ -45,18 +45,18 @@ impl DatabaseSettings {
 }
 
 pub fn get() -> Result<Settings, config::ConfigError> {
-    let base_path = project_path();
-    let config_dir = base_path.join("configuration");
-
-    let environment: Environment = std::env::var("APP_ENV")
-        .unwrap_or_else(|_| "local".into())
-        .try_into()
-        .expect("Failed to parse APP_ENV");
-    let environment_filename = format!("{}.yaml", environment.as_str());
+    let config_dir = config_dir().expect("Failed to find configuration directory");
 
     let settings = config::Config::builder()
         .add_source(config::File::from(config_dir.join("base.yaml")))
-        .add_source(config::File::from(config_dir.join(environment_filename)))
+        .add_source(config::File::from({
+            let environment: Environment = std::env::var("APP_ENV")
+                .unwrap_or_else(|_| "local".into())
+                .try_into()
+                .expect("Failed to parse APP_ENV");
+
+            config_dir.join(format!("{environment}.yaml"))
+        }))
         .add_source(
             config::Environment::with_prefix("APP")
                 .prefix_separator("_")
@@ -67,17 +67,18 @@ pub fn get() -> Result<Settings, config::ConfigError> {
     settings.try_deserialize()
 }
 
-fn project_path() -> PathBuf {
+fn config_dir() -> Option<PathBuf> {
     let mut dir = std::env::current_dir().expect("Failed to get current directory");
 
-    if dir.join("Cargo.lock").exists() {
-        return dir;
+    loop {
+        let candidate = dir.join("configuration");
+        if candidate.exists() {
+            return Some(candidate);
+        }
+        if !dir.pop() {
+            return None;
+        }
     }
-    // When running cargo test, the workspace crate's directory becomes the CWD,
-    // so we have to go up one level.
-    dir.pop();
-
-    dir
 }
 
 pub enum Environment {
@@ -85,12 +86,13 @@ pub enum Environment {
     Production,
 }
 
-impl Environment {
-    pub fn as_str(&self) -> &'static str {
-        match self {
+impl Display for Environment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             Environment::Local => "local",
             Environment::Production => "production",
-        }
+        };
+        write!(f, "{str}")
     }
 }
 

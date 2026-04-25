@@ -1,8 +1,10 @@
 [workspace]
 resolver = "3"
-members = [
+members = ["dictionary",
     "server", "xtask",
 ]
 
 [workspace.dependencies]
 anyhow = "1.0.102"
+thiserror = "2.0.18"
+serde = { version = "1.0.228", features = ["derive"] }
