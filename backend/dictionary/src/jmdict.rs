@@ -1,23 +1,38 @@
-#![allow(dead_code)]
-use std::{convert::AsRef, fs::File, path::Path};
+use std::{
+    fmt::{self, Display},
+    io::Read,
+};
 
 use thiserror::Error;
 
 #[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct JMDict {
+    pub common_only: bool,
+    pub version: String,
     pub words: Vec<JMDictWord>,
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct JMDictWord {
-    pub id: String,
+    pub id: JMDictId,
     pub kana: Vec<JMDictKana>,
     pub kanji: Vec<JMDictKanji>,
     pub sense: Vec<JMDictSense>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize, serde::Serialize)]
+pub struct JMDictId(pub String);
+
+impl Display for JMDictId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
+
 #[derive(Debug, Clone, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct JMDictKana {
     pub applies_to_kanji: Vec<String>,
     pub common: bool,
@@ -26,6 +41,7 @@ pub struct JMDictKana {
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
+#[allow(dead_code)]
 pub struct JMDictKanji {
     pub common: bool,
     pub tags: Vec<String>,
@@ -34,6 +50,7 @@ pub struct JMDictKanji {
 
 #[derive(Debug, Clone, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct JMDictSense {
     pub applies_to_kana: Vec<String>,
     pub applies_to_kanji: Vec<String>,
@@ -50,6 +67,7 @@ pub struct JMDictGloss {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Deserialize)]
+#[allow(dead_code)]
 pub enum JMDictTag {
     PartOfSpeech(JMDictPartOfSpeechTag),
     Misc(JMDictMiscTag),
@@ -57,7 +75,7 @@ pub enum JMDictTag {
 
 macro_rules! pos_enum {
     ($(($ident:ident, $tag:literal, $desc:literal)),+) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Deserialize)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Deserialize, serde::Serialize)]
         pub enum JMDictPartOfSpeechTag {
         $(
             #[serde(rename = $tag)]
@@ -167,28 +185,28 @@ pub type JMDictMiscTag = String;
 
 #[derive(Debug, Error)]
 pub enum JMDictLoadError {
-    #[error("failed to load JMDict file")]
-    File(std::io::Error),
-    #[error("failed to deserialize JMDict file")]
+    #[error("failed to deserialize JMDict")]
     Deserialize(serde_json::Error),
 }
 
-pub fn load(path: impl AsRef<Path>) -> Result<JMDict, JMDictLoadError> {
-    let jmdict_file = File::open(path).map_err(JMDictLoadError::File)?;
-    serde_json::from_reader(jmdict_file).map_err(JMDictLoadError::Deserialize)
+pub fn load(rdr: impl Read) -> Result<JMDict, JMDictLoadError> {
+    serde_json::from_reader(rdr).map_err(JMDictLoadError::Deserialize)
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::{fs::File, path::Path};
 
     use crate::jmdict;
 
     #[test]
     fn load_works() {
-        let jmdict_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../static/jmdict-eng-common-3.6.2.json");
+        let jmdict_path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../static/jmdict-eng-common-3.6.2.json");
+        let jmdict_reader = File::open(jmdict_path).expect("failed to open JMDict file");
 
-        assert!(jmdict::load(jmdict_path).is_ok());
+        let dict = jmdict::load(jmdict_reader);
+
+        assert!(dict.is_ok());
     }
 }

@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
+dictionary = { path = "../dictionary" }
+tracing-subscriber = { workspace = true }
+tracing = { workspace = true }

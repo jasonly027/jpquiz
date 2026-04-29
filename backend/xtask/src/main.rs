@@ -1,6 +1,13 @@
-use std::{env, process::Command};
+use std::{
+    env,
+    fs::File,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use anyhow::{Context, Result, bail};
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::fmt::time::Uptime;
 
 fn main() {
     if let Err(e) = try_main() {
@@ -10,11 +17,19 @@ fn main() {
 }
 
 fn try_main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .with_max_level(LevelFilter::INFO)
+        .with_timer(Uptime::default())
+        .with_file(false)
+        .with_line_number(false)
+        .init();
+
     let task = env::args().nth(1);
     match task.as_deref() {
         Some("db:up") => db_up()?,
         Some("db:down") => db_down()?,
         Some("run") => run()?,
+        Some("generate-dict") => generate_dict()?,
         _ => print_help(),
     }
     Ok(())
@@ -27,6 +42,7 @@ fn print_help() {
 db:up             Start development database
 db:down           Stop development database
 run               Run server crate
+generate-dict     Generate dictionary file
     "
     )
 }
@@ -82,4 +98,24 @@ fn run_cargo(cmd: &[&str]) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn generate_dict() -> Result<()> {
+    let jmdict_path =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../static/jmdict-eng-common-3.6.2.json");
+    let jmdict_rdr = File::open(jmdict_path).context("failed to open JMDict file")?;
+
+    let jlpt_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../static/JLPTWords-1.4.json");
+    let jlpt_rdr = File::open(jlpt_path).context("failed to open JLPT file")?;
+
+    let output_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../static/dictionary.json");
+    let output = File::options()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(output_path)
+        .context("failed to open output file")?;
+
+    dictionary::generate_dictionary_file(jmdict_rdr, jlpt_rdr, output)
+        .context("generate dictionary file")
 }
