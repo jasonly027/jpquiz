@@ -1,8 +1,8 @@
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 use axum::Router;
 use server::{
-    application,
+    application::{self, AppStateInternal},
     configuration::{self, DatabaseSettings},
     telemetry,
 };
@@ -25,8 +25,11 @@ pub async fn test_router() -> Router {
     };
 
     let db_pool = test_pool(&config.database).await;
+    let state = Arc::new(AppStateInternal { db_pool });
 
-    application::router(db_pool)
+    let (router, _) = application::router().split_for_parts();
+
+    router.with_state(state)
 }
 
 #[tracing::instrument(level = "debug", name = "Creating test database pool", fields(database_name = config.database), skip(config))]

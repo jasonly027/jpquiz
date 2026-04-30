@@ -1,6 +1,7 @@
 use std::{
     env,
     fs::File,
+    io::Write,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -30,6 +31,7 @@ fn try_main() -> Result<()> {
         Some("db:down") => db_down()?,
         Some("run") => run()?,
         Some("generate-dict") => generate_dict()?,
+        Some("generate-api") => generate_api()?,
         _ => print_help(),
     }
     Ok(())
@@ -43,6 +45,7 @@ db:up             Start development database
 db:down           Stop development database
 run               Run server crate
 generate-dict     Generate dictionary file
+generate-api      Generate OpenAPI specification
     "
     )
 }
@@ -118,4 +121,19 @@ fn generate_dict() -> Result<()> {
 
     dictionary::generate_dictionary_file(jmdict_rdr, jlpt_rdr, output)
         .context("generate dictionary file")
+}
+
+fn generate_api() -> Result<()> {
+    let api_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../docs/openapi.json");
+    let mut api_file = File::options()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(api_path)?;
+
+    let (_router, api) = server::application::router().split_for_parts();
+
+    let api_json = api.to_pretty_json()?;
+
+    Ok(api_file.write(api_json.as_bytes()).map(|_| ())?)
 }

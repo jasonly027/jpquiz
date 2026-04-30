@@ -12,8 +12,9 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-axum = "0.8.9"
+axum = { version = "0.8.9", features = ["macros"] }
 config = "0.15.22"
+dictionary = { path = "../dictionary" }
 dotenvy = "0.15.7"
 secrecy = { version = "0.10.3", features = ["serde"] }
 serde = { workspace = true }
@@ -26,6 +27,8 @@ tracing = { workspace = true }
 tracing-bunyan-formatter = "0.3.10"
 tracing-subscriber = { workspace = true }
 ulid = "1.2.1"
+utoipa = "5.4.0"
+utoipa-axum = "0.2.0"
 uuid = { version = "1.23.1", features = ["v7"] }
 
 [dev-dependencies]

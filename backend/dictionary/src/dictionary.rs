@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use thiserror::Error;
 
-use crate::jlpt::NLevel;
+pub use crate::jlpt::NLevel;
 use crate::jmdict::{JMDictId, JMDictPartOfSpeechTag};
 
 #[derive(Debug)]
