@@ -1,7 +1,5 @@
 use std::{collections::HashMap, io::Read};
 
-use serde::{Deserialize, de::Error};
-
 use thiserror::Error;
 
 use crate::jmdict::JMDictId;
@@ -108,7 +106,9 @@ impl JLPTPair {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(try_from = "u8")]
+#[serde(into = "u8")]
 pub enum NLevel {
     N1,
     N2,
@@ -117,30 +117,36 @@ pub enum NLevel {
     N5,
 }
 
-impl<'de> Deserialize<'de> for NLevel {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        match u8::deserialize(deserializer)? {
+impl TryFrom<u8> for NLevel {
+    type Error = &'static str;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
             1 => Ok(Self::N1),
             2 => Ok(Self::N2),
             3 => Ok(Self::N3),
             4 => Ok(Self::N4),
             5 => Ok(Self::N5),
-            x => Err(D::Error::unknown_variant(
-                &x.to_string(),
-                &["1", "2", "3", "4", "5"],
-            )),
+            _ => Err("invalid NLevel, expected 1-5"),
+        }
+    }
+}
+
+impl From<NLevel> for u8 {
+    fn from(value: NLevel) -> Self {
+        match value {
+            NLevel::N1 => 1,
+            NLevel::N2 => 2,
+            NLevel::N3 => 3,
+            NLevel::N4 => 4,
+            NLevel::N5 => 5,
         }
     }
 }
 
 #[derive(Debug, Error)]
-pub enum JLPTLoadError {
-    #[error("failed to deserialize JLPT")]
-    Deserialize(serde_json::Error),
-}
+#[error("failed to deserialize JLPT")]
+pub struct JLPTLoadError(#[from] serde_json::Error);
 
 pub fn load(rdr: impl Read) -> Result<Vec<JLPTEntry>, JLPTLoadError> {
     let jlpt_raw = load_raw(rdr)?;
@@ -175,7 +181,7 @@ struct JLPTReading {
 }
 
 fn load_raw(rdr: impl Read) -> Result<RawJLPT, JLPTLoadError> {
-    Ok(serde_json::from_reader(rdr).map_err(JLPTLoadError::Deserialize)?)
+    Ok(serde_json::from_reader(rdr)?)
 }
 
 #[cfg(test)]

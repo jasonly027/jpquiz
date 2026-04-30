@@ -184,13 +184,11 @@ pos_enum![
 pub type JMDictMiscTag = String;
 
 #[derive(Debug, Error)]
-pub enum JMDictLoadError {
-    #[error("failed to deserialize JMDict")]
-    Deserialize(serde_json::Error),
-}
+#[error("failed to deserialize JMDict")]
+pub struct JMDictLoadError(#[from] serde_json::Error);
 
 pub fn load(rdr: impl Read) -> Result<JMDict, JMDictLoadError> {
-    serde_json::from_reader(rdr).map_err(JMDictLoadError::Deserialize)
+    Ok(serde_json::from_reader(rdr)?)
 }
 
 #[cfg(test)]

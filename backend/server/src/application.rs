@@ -68,7 +68,7 @@ pub fn router() -> OpenApiRouter<AppState> {
 
     let router = OpenApiRouter::with_openapi(Api::openapi())
         .routes(utoipa_axum::routes!(routes::health_check))
-        .nest("/multi_choice", routes::multi_choice::router())
+        .nest("/game/multi_choice", routes::multi_choice::router())
         .layer(middleware);
 
     router

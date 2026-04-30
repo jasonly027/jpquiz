@@ -1,8 +1,6 @@
 #![allow(dead_code)]
-use std::collections::HashMap;
-use std::fs::File;
-use std::path::Path;
 use std::rc::Rc;
+use std::{collections::HashMap, io::Read};
 
 use thiserror::Error;
 
@@ -11,48 +9,42 @@ use crate::jmdict::{JMDictId, JMDictPartOfSpeechTag};
 
 #[derive(Debug)]
 pub struct Dictionary {
-    words: HashMap<Rc<DictionaryId>, Word>,
+    pub word_map: HashMap<Rc<DictionaryId>, Rc<Word>>,
+    pub words: Vec<Rc<Word>>,
 }
 
 impl Dictionary {
-    pub fn load(dictionary_path: impl AsRef<Path>) -> Result<Self, DictionaryLoadError> {
-        let dict_file = File::open(dictionary_path).map_err(DictionaryLoadError::File)?;
-        let dict_raw: persistence::Dictionary =
-            serde_json::from_reader(dict_file).map_err(DictionaryLoadError::Deserialize)?;
+    pub fn load(rdr: impl Read) -> Result<Self, DictionaryLoadError> {
+        let dict: persistence::Dictionary = serde_json::from_reader(rdr)?;
 
-        let words = dict_raw
+        let words: Vec<Rc<Word>> = dict
             .words
             .into_iter()
-            .map(|(id, word_raw)| {
-                let id = Rc::new(id);
+            .map(|word| {
+                let id = Rc::new(word.id);
 
-                let senses: Vec<Rc<Sense>> = word_raw
-                    .senses
-                    .into_iter()
-                    .map(|s| Rc::new(s.into()))
-                    .collect();
+                let senses: Vec<Rc<Sense>> =
+                    word.senses.into_iter().map(|s| Rc::new(s.into())).collect();
 
-                let pairs = word_raw
+                let pairs = word
                     .pairs
                     .into_iter()
                     .map(|pair| pair.to_runtime(id.clone(), &senses))
                     .collect();
 
-                (id.clone(), Word { id, pairs })
+                Rc::new(Word { id, pairs })
             })
             .collect();
 
-        Ok(Self { words })
+        let word_map = words.iter().map(|w| (w.id.clone(), w.clone())).collect();
+
+        Ok(Self { words, word_map })
     }
 }
 
 #[derive(Debug, Error)]
-pub enum DictionaryLoadError {
-    #[error("failed to open dictionary file")]
-    File(std::io::Error),
-    #[error("failed to deserialize dictionary")]
-    Deserialize(serde_json::Error),
-}
+#[error("failed to deserialize dictionary")]
+pub struct DictionaryLoadError(#[from] serde_json::Error);
 
 pub type DictionaryId = JMDictId;
 
@@ -97,11 +89,12 @@ mod persistence {
 
     #[derive(Debug, serde::Serialize, serde::Deserialize)]
     pub struct Dictionary {
-        pub words: HashMap<runtime::DictionaryId, Word>,
+        pub words: Vec<Word>,
     }
 
-    #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+    #[derive(Debug, serde::Serialize, serde::Deserialize)]
     pub struct Word {
+        pub id: runtime::DictionaryId,
         pub pairs: Vec<WordPair>,
         pub senses: Vec<Sense>,
     }
@@ -173,13 +166,11 @@ mod persistence {
     #[derive(Debug, Error)]
     pub enum GenerateDictionaryFileError {
         #[error(transparent)]
-        JMDict(JMDictLoadError),
+        JMDict(#[from] JMDictLoadError),
         #[error(transparent)]
-        JLPT(JLPTLoadError),
-        #[error("failed to open output file")]
-        FileWrite(std::io::Error),
+        JLPT(#[from] JLPTLoadError),
         #[error("failed serialize dictionary")]
-        Serialization(serde_json::Error),
+        Serialization(#[from] serde_json::Error),
     }
 
     pub fn generate_dictionary_file(
@@ -187,18 +178,18 @@ mod persistence {
         jlpt_rdr: impl Read,
         writer: impl Write,
     ) -> Result<(), GenerateDictionaryFileError> {
-        let jmdict = jmdict::load(jmdict_rdr).map_err(GenerateDictionaryFileError::JMDict)?;
+        let jmdict = jmdict::load(jmdict_rdr)?;
         info!(
             "Loaded JMDict v{} Common={}",
             jmdict.version, jmdict.common_only,
         );
         info!("{} JMDict words", jmdict.words.len());
 
-        let jlpt = jlpt::load(jlpt_rdr).map_err(GenerateDictionaryFileError::JLPT)?;
+        let jlpt = jlpt::load(jlpt_rdr)?;
         info!("Loaded JLPT List",);
         info!("{} JLPT entries", jlpt.len());
 
-        let mut dictionary: HashMap<runtime::DictionaryId, Word> = HashMap::new();
+        let mut word_map: HashMap<runtime::DictionaryId, Word> = HashMap::new();
 
         // Insert JLPT pairs parsed with JMDict
         jlpt.into_iter()
@@ -206,12 +197,18 @@ mod persistence {
                 let Some((id, pair)) = find_pair(&jmdict, level, pair) else {
                     return;
                 };
-                let word = dictionary.entry(id).or_insert_with(Word::default);
+
+                let word = word_map.entry(id.clone()).or_insert_with(|| Word {
+                    id,
+                    pairs: Vec::new(),
+                    senses: Vec::new(),
+                });
+
                 word.pairs.push(pair);
             });
 
         // Hydrate with senses
-        dictionary.iter_mut().for_each(|(id, word)| {
+        word_map.iter_mut().for_each(|(id, word)| {
             let jmdict_word = jmdict
                 .words
                 .iter()
@@ -236,11 +233,13 @@ mod persistence {
 
         info!(
             "{} pairs matched",
-            dictionary.values().map(|e| e.pairs.len()).sum::<usize>()
+            word_map.values().map(|e| e.pairs.len()).sum::<usize>()
         );
 
-        serde_json::to_writer_pretty(writer, &dictionary)
-            .map_err(GenerateDictionaryFileError::Serialization)?;
+        let words = word_map.into_values().collect();
+        let dictionary = Dictionary { words };
+
+        serde_json::to_writer_pretty(writer, &dictionary)?;
 
         Ok(())
     }
@@ -368,7 +367,7 @@ pub use persistence::generate_dictionary_file;
 mod test {
     use std::{fs::File, path::Path};
 
-    use crate::dictionary;
+    use crate::{Dictionary, dictionary};
 
     #[test]
     fn generate_dictionary_file_works() {
@@ -382,5 +381,23 @@ mod test {
         let output = std::io::sink();
 
         assert!(dictionary::generate_dictionary_file(jmdict_reader, jlpt_reader, output).is_ok());
+    }
+
+    #[test]
+    fn dictionary_load_time() {
+        let dict_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../static/dictionary.json");
+
+        let mut total_duration = std::time::Duration::ZERO;
+        let iterations = 5;
+
+        for _ in 0..iterations {
+            let dict_rdr = File::open(&dict_path).expect("failed to open dictionary file");
+            let start = std::time::Instant::now();
+            let _dict = Dictionary::load(dict_rdr).expect("failed to load dictionary");
+            total_duration += start.elapsed();
+        }
+
+        let avg = total_duration / iterations;
+        println!("Average dictionary load time over {iterations} runs: {avg:?}");
     }
 }
