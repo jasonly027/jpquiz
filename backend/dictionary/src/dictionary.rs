@@ -50,26 +50,88 @@ pub type DictionaryId = JMDictId;
 
 #[derive(Debug)]
 pub struct Word {
-    id: Rc<DictionaryId>,
-    pairs: Vec<WordPair>,
+    pub id: Rc<DictionaryId>,
+    pub pairs: Vec<WordPair>,
 }
 
 #[derive(Debug)]
 pub struct WordPair {
-    id: Rc<DictionaryId>,
-    kana: String,
-    kanji: Option<String>,
-    level: NLevel,
-    senses: Vec<Rc<Sense>>,
+    pub id: Rc<DictionaryId>,
+    pub kana: String,
+    pub kanji: Option<String>,
+    pub level: NLevel,
+    pub senses: Vec<Rc<Sense>>,
 }
 
 #[derive(Debug)]
 pub struct Sense {
-    glossary: Vec<String>,
-    parts_of_speech: Vec<PartOfSpeechTag>,
+    pub glossary: Vec<String>,
+    pub parts_of_speech: Vec<PartOfSpeechTag>,
 }
 
 pub type PartOfSpeechTag = JMDictPartOfSpeechTag;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PartOfSpeechCategory {
+    Nouns,
+    Verbs,
+    Adjectives,
+    Adverbs,
+    Expressions,
+    Conjunctions,
+    Other,
+}
+
+macro_rules! is_category_fn {
+    ($fn_name:ident, [$($tags:ident),+ $(,)?]) => {
+        fn $fn_name(tag: PartOfSpeechTag) -> bool {
+            matches!(tag, $(PartOfSpeechTag::$tags)|+)
+        }
+    };
+}
+
+impl PartOfSpeechCategory {
+    pub fn contains(&self, tag: PartOfSpeechTag) -> bool {
+        matches!(5, 1 | 2);
+        match self {
+            PartOfSpeechCategory::Nouns => Self::is_noun(tag),
+            PartOfSpeechCategory::Verbs => Self::is_verb(tag),
+            PartOfSpeechCategory::Adjectives => Self::is_adjective(tag),
+            PartOfSpeechCategory::Adverbs => Self::is_adverb(tag),
+            PartOfSpeechCategory::Expressions => Self::is_expression(tag),
+            PartOfSpeechCategory::Conjunctions => Self::is_conjunction(tag),
+            PartOfSpeechCategory::Other => Self::is_other(tag),
+        }
+    }
+
+    is_category_fn!(is_noun, [N, Pn, NPr, NPref, NSuf, Nt]);
+
+    is_category_fn!(
+        is_verb,
+        [
+            Vi, Vt, Vn, Vr, Vk, Vz, VsC, VsS, VsI, Vs, AuxV, VUnspec, V1, V1S, V2aS, V2gK, V2kK,
+            V2rK, V2bK, V2mK, V2tK, V2dK, V2yK, V2hK, V2gS, V2wS, V2nS, V2yS, V2hS, V2kS, V2sS,
+            V2rS, V2bS, V2zS, V2mS, V2dS, V2tS, V4b, V4g, V4h, V4k, V4m, V4n, V4s, V4r, V4t, V5b,
+            V5g, V5k, V5n, V5m, V5r, V5t, V5s, V5u, V5kS, V5rI, V5uS, V5aru, V5uru,
+        ]
+    );
+
+    is_category_fn!(
+        is_adjective,
+        [
+            AdjI, AdjIx, AdjT, AuxAdj, AdjKari, AdjShiku, AdjNari, AdjKu, AdjNa, AdjF, AdjNo,
+            AdjPn,
+        ]
+    );
+
+    is_category_fn!(is_adverb, [Adv, AdvTo, NAdv,]);
+
+    is_category_fn!(is_expression, [Exp, Int]);
+
+    is_category_fn!(is_conjunction, [Conj]);
+
+    is_category_fn!(is_other, [Pref, Ctr, Suf, Prt, Aux, Cop, Num, Unc,]);
+}
 
 mod persistence {
     use std::{
