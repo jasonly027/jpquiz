@@ -3,11 +3,10 @@ use std::{collections::HashMap, io::Read};
 
 use thiserror::Error;
 
-use crate::filters::{ContainsPartOfSpeechCategory, WordPairFilter};
 pub use crate::jlpt::NLevel;
 use crate::jmdict::{JMDictId, JMDictPartOfSpeechTag};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Dictionary {
     pub words: HashMap<Rc<DictionaryId>, Word>,
 }
@@ -37,27 +36,6 @@ impl Dictionary {
 
         Ok(Self { words })
     }
-
-    pub fn pairs(&self, filter: WordPairFilter) -> impl Iterator<Item = WordPair> {
-        self.words.values().flat_map(move |word| {
-            word.pairs
-                .iter()
-                .filter(move |p| filter.matches_pair(p))
-                .map(move |pair| {
-                    let senses = pair
-                        .senses
-                        .iter()
-                        .filter(move |sense| filter.matches_sense(sense))
-                        .cloned()
-                        .collect();
-
-                    WordPair {
-                        senses,
-                        ..pair.clone()
-                    }
-                })
-        })
-    }
 }
 
 #[derive(Debug, Error)]
@@ -66,7 +44,7 @@ pub struct DictionaryLoadError(#[from] serde_json::Error);
 
 pub type DictionaryId = JMDictId;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Word {
     pub id: Rc<DictionaryId>,
     pub pairs: Vec<WordPair>,
@@ -81,7 +59,7 @@ pub struct WordPair {
     pub senses: Vec<Rc<Sense>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Sense {
     pub glossary: Vec<String>,
     pub parts_of_speech: Vec<PartOfSpeechTag>,
@@ -110,7 +88,6 @@ macro_rules! is_category_fn {
 
 impl PartOfSpeechCategory {
     pub fn contains(&self, tag: PartOfSpeechTag) -> bool {
-        matches!(5, 1 | 2);
         match self {
             PartOfSpeechCategory::Nouns => Self::is_noun(tag),
             PartOfSpeechCategory::Verbs => Self::is_verb(tag),
