@@ -1,23 +1,22 @@
-#![allow(dead_code)]
 use std::rc::Rc;
 use std::{collections::HashMap, io::Read};
 
 use thiserror::Error;
 
+use crate::filters::{ContainsPartOfSpeechCategory, WordPairFilter};
 pub use crate::jlpt::NLevel;
 use crate::jmdict::{JMDictId, JMDictPartOfSpeechTag};
 
 #[derive(Debug)]
 pub struct Dictionary {
-    pub word_map: HashMap<Rc<DictionaryId>, Rc<Word>>,
-    pub words: Vec<Rc<Word>>,
+    pub words: HashMap<Rc<DictionaryId>, Word>,
 }
 
 impl Dictionary {
     pub fn load(rdr: impl Read) -> Result<Self, DictionaryLoadError> {
         let dict: persistence::Dictionary = serde_json::from_reader(rdr)?;
 
-        let words: Vec<Rc<Word>> = dict
+        let words = dict
             .words
             .into_iter()
             .map(|word| {
@@ -32,13 +31,32 @@ impl Dictionary {
                     .map(|pair| pair.to_runtime(id.clone(), &senses))
                     .collect();
 
-                Rc::new(Word { id, pairs })
+                (id.clone(), Word { id, pairs })
             })
             .collect();
 
-        let word_map = words.iter().map(|w| (w.id.clone(), w.clone())).collect();
+        Ok(Self { words })
+    }
 
-        Ok(Self { words, word_map })
+    pub fn pairs(&self, filter: WordPairFilter) -> impl Iterator<Item = WordPair> {
+        self.words.values().flat_map(move |word| {
+            word.pairs
+                .iter()
+                .filter(move |p| filter.matches_pair(p))
+                .map(move |pair| {
+                    let senses = pair
+                        .senses
+                        .iter()
+                        .filter(move |sense| filter.matches_sense(sense))
+                        .cloned()
+                        .collect();
+
+                    WordPair {
+                        senses,
+                        ..pair.clone()
+                    }
+                })
+        })
     }
 }
 
@@ -54,7 +72,7 @@ pub struct Word {
     pub pairs: Vec<WordPair>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WordPair {
     pub id: Rc<DictionaryId>,
     pub kana: String,
