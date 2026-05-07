@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "server",
+    "title": "jpquiz",
     "description": "",
     "license": {
       "name": ""
@@ -9,6 +9,71 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/game/multi_choice": {
+      "get": {
+        "operationId": "get_game",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GameMode"
+            }
+          },
+          {
+            "name": "levels",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/NLevelDto"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "pos",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/PartOfSpeechCategoryDto"
+              },
+              "uniqueItems": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MultiChoiceQuestion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No questions matching filters"
+          }
+        }
+      }
+    },
     "/health_check": {
       "get": {
         "operationId": "health_check",
@@ -27,5 +92,121 @@
       }
     }
   },
-  "components": {}
+  "components": {
+    "schemas": {
+      "GameMode": {
+        "type": "string",
+        "enum": [
+          "engtokana",
+          "engtokanji",
+          "kanatokanji",
+          "kanatoeng",
+          "kanjitokana",
+          "kanjitoeng"
+        ]
+      },
+      "MultiChoiceQuestion": {
+        "type": "object",
+        "required": [
+          "prompt",
+          "choices",
+          "answer_idx",
+          "word_pair"
+        ],
+        "properties": {
+          "answer_idx": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "word_pair": {
+            "$ref": "#/components/schemas/WordDto"
+          }
+        }
+      },
+      "NLevelDto": {
+        "type": "string",
+        "enum": [
+          "N1",
+          "N2",
+          "N3",
+          "N4",
+          "N5"
+        ]
+      },
+      "PartOfSpeechCategoryDto": {
+        "type": "string",
+        "enum": [
+          "nouns",
+          "verbs",
+          "adjectives",
+          "adverbs",
+          "expressions",
+          "conjunctions",
+          "other"
+        ]
+      },
+      "SenseDto": {
+        "type": "object",
+        "required": [
+          "glossary",
+          "partsOfSpeech"
+        ],
+        "properties": {
+          "glossary": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "partsOfSpeech": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WordDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "kana",
+          "level",
+          "senses"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kana": {
+            "type": "string"
+          },
+          "kanji": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "level": {
+            "$ref": "#/components/schemas/NLevelDto"
+          },
+          "senses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SenseDto"
+            }
+          }
+        }
+      }
+    }
+  }
 }

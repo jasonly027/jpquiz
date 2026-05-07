@@ -106,7 +106,7 @@ impl JLPTPair {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(try_from = "u8")]
 #[serde(into = "u8")]
 pub enum NLevel {

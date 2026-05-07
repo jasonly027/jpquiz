@@ -1,6 +1,7 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use std::{collections::HashMap, io::Read};
 
+use serde::Serialize;
 use thiserror::Error;
 
 pub use crate::jlpt::NLevel;
@@ -8,7 +9,7 @@ use crate::jmdict::{JMDictId, JMDictPartOfSpeechTag};
 
 #[derive(Debug, Clone)]
 pub struct Dictionary {
-    pub words: HashMap<Rc<DictionaryId>, Word>,
+    pub words: HashMap<Arc<DictionaryId>, Word>,
 }
 
 impl Dictionary {
@@ -19,12 +20,15 @@ impl Dictionary {
             .words
             .into_iter()
             .map(|word| {
-                let id = Rc::new(word.id);
+                let id = Arc::new(word.id);
 
-                let senses: Vec<Rc<Sense>> =
-                    word.senses.into_iter().map(|s| Rc::new(s.into())).collect();
+                let senses: Vec<Arc<Sense>> = word
+                    .senses
+                    .into_iter()
+                    .map(|s| Arc::new(s.into()))
+                    .collect();
 
-                let pairs = word
+                let pairs: Vec<WordPair> = word
                     .pairs
                     .into_iter()
                     .map(|pair| pair.to_runtime(id.clone(), &senses))
@@ -36,6 +40,14 @@ impl Dictionary {
 
         Ok(Self { words })
     }
+
+    pub fn words(&self) -> impl Iterator<Item = &Word> {
+        self.words.values()
+    }
+
+    pub fn pairs(&self) -> impl Iterator<Item = &WordPair> {
+        self.words().flat_map(|w| w.pairs.iter())
+    }
 }
 
 #[derive(Debug, Error)]
@@ -46,20 +58,20 @@ pub type DictionaryId = JMDictId;
 
 #[derive(Debug, Clone)]
 pub struct Word {
-    pub id: Rc<DictionaryId>,
+    pub id: Arc<DictionaryId>,
     pub pairs: Vec<WordPair>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct WordPair {
-    pub id: Rc<DictionaryId>,
+    pub id: Arc<DictionaryId>,
     pub kana: String,
     pub kanji: Option<String>,
     pub level: NLevel,
-    pub senses: Vec<Rc<Sense>>,
+    pub senses: Vec<Arc<Sense>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Sense {
     pub glossary: Vec<String>,
     pub parts_of_speech: Vec<PartOfSpeechTag>,
@@ -67,7 +79,7 @@ pub struct Sense {
 
 pub type PartOfSpeechTag = JMDictPartOfSpeechTag;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PartOfSpeechCategory {
     Nouns,
     Verbs,
@@ -132,7 +144,7 @@ mod persistence {
     use std::{
         collections::HashMap,
         io::{Read, Write},
-        rc::Rc,
+        sync::Arc,
     };
 
     use thiserror::Error;
@@ -167,8 +179,8 @@ mod persistence {
     impl WordPair {
         pub fn to_runtime(
             self,
-            id: Rc<runtime::DictionaryId>,
-            senses: &[Rc<runtime::Sense>],
+            id: Arc<runtime::DictionaryId>,
+            senses: &[Arc<runtime::Sense>],
         ) -> runtime::WordPair {
             runtime::WordPair {
                 id: id.clone(),

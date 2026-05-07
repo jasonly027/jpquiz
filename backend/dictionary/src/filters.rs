@@ -1,6 +1,4 @@
-use std::rc::Rc;
-
-use crate::{Dictionary, NLevel, PartOfSpeechCategory, Sense, Word, WordPair};
+use crate::{NLevel, PartOfSpeechCategory, Sense, Word, WordPair};
 
 pub trait ContainsPartOfSpeechCategory {
     fn contains_pos(&self, category: PartOfSpeechCategory) -> bool;
@@ -34,57 +32,50 @@ impl ContainsNLevel for Word {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct WordPairFilter {
-    pub level: Option<NLevel>,
-    pub pos: Option<PartOfSpeechCategory>,
-}
+pub mod word_pair {
+    use std::{collections::HashSet, sync::Arc};
 
-impl WordPairFilter {
-    pub fn new() -> Self {
-        Self::default()
+    use crate::{NLevel, PartOfSpeechCategory, Sense, WordPair};
+
+    pub fn levels(levels: impl Iterator<Item = NLevel>) -> impl Fn(&WordPair) -> bool {
+        let levels: HashSet<NLevel> = levels.collect();
+        move |pair| levels.contains(&pair.level)
     }
 
-    pub fn level(mut self, level: NLevel) -> Self {
-        self.level = Some(level);
-        self
-    }
+    pub fn categories(
+        categories: impl Iterator<Item = PartOfSpeechCategory>,
+    ) -> impl Fn(&WordPair) -> Option<WordPair> {
+        let categories: HashSet<PartOfSpeechCategory> = categories.collect();
 
-    pub fn pos(mut self, pos: PartOfSpeechCategory) -> Self {
-        self.pos = Some(pos);
-        self
-    }
+        move |pair| {
+            let senses: Vec<Arc<Sense>> = pair
+                .senses
+                .iter()
+                .filter(|sense| {
+                    sense
+                        .parts_of_speech
+                        .iter()
+                        .any(|pos| categories.iter().any(|cat| cat.contains(*pos)))
+                })
+                .cloned()
+                .collect();
 
-    pub fn matches_sense(&self, sense: &Sense) -> bool {
-        self.pos.is_none_or(|p| sense.contains_pos(p))
-    }
+            if senses.is_empty() {
+                return None;
+            }
 
-    /// Constructs a new [`WordPair`] containing only the senses that match the filter.
-    /// Returns [`None`] if `pair` does not match the filter level, or if no senses match.
-    pub fn apply(&self, pair: &WordPair) -> Option<WordPair> {
-        if self.level.is_some_and(|l| l != pair.level) {
-            return None;
+            Some(WordPair {
+                senses,
+                ..pair.clone()
+            })
         }
-
-        let senses: Vec<Rc<Sense>> = pair
-            .senses
-            .iter()
-            .filter(|s| self.matches_sense(s))
-            .cloned()
-            .collect();
-        if senses.is_empty() {
-            return None;
-        }
-
-        Some(WordPair {
-            senses,
-            ..pair.clone()
-        })
     }
 
-    pub fn pairs(&self, dict: &Dictionary) -> impl Iterator<Item = WordPair> {
-        dict.words
-            .values()
-            .flat_map(|word| word.pairs.iter().filter_map(|pair| self.apply(pair)))
+    pub fn has_kanji(pair: &WordPair) -> bool {
+        pair.kanji.is_some()
+    }
+
+    pub fn passthrough(_pair: &WordPair) -> bool {
+        true
     }
 }

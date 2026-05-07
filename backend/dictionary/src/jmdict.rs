@@ -72,7 +72,6 @@ pub enum JMDictTag {
     PartOfSpeech(JMDictPartOfSpeechTag),
     Misc(JMDictMiscTag),
 }
-
 macro_rules! pos_enum {
     ($(($ident:ident, $tag:literal, $desc:literal)),+ $(,)?) => {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Deserialize, serde::Serialize)]
@@ -81,6 +80,14 @@ macro_rules! pos_enum {
             #[serde(rename = $tag)]
             $ident,
         )*
+        }
+
+        impl JMDictPartOfSpeechTag {
+            pub fn detail(&self) -> &'static str {
+                match self {
+                    $(Self::$ident => $desc),*
+                }
+            }
         }
     };
 }

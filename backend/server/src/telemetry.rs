@@ -1,7 +1,8 @@
-use std::fmt::Display;
+use std::{fmt::Display, sync::Arc};
 
+use axum::{extract::Request, middleware::Next, response::Response};
 use tower_http::trace::MakeSpan;
-use tracing::{Level, subscriber::set_global_default};
+use tracing::{Level, error, subscriber::set_global_default};
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::{EnvFilter, Registry, layer::SubscriberExt};
 use uuid::Uuid;
@@ -91,4 +92,12 @@ impl Display for RequestId {
             self.0.hyphenated().encode_lower(&mut Uuid::encode_buffer())
         )
     }
+}
+
+pub async fn log_server_failures(request: Request, next: Next) -> Response {
+    let response = next.run(request).await;
+    if let Some(err) = response.extensions().get::<Arc<anyhow::Error>>() {
+        error!(?err, "unexpected error occured in handler");
+    }
+    response
 }

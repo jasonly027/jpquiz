@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 members = ["dictionary",
-    "server", "xtask",
+    "server", "server_derive", "xtask",
 ]
 
 [workspace.dependencies]
@@ -10,3 +10,6 @@ thiserror = "2.0.18"
 serde = { version = "1.0.228", features = ["derive"] }
 tracing = { version = "0.1.44" }
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+axum = { version = "0.8.9", features = ["macros"] }
+axum-extra = { version = "0.12.6", features = ["query"] }
+http = "1.4.0"

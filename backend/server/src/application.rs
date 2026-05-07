@@ -1,19 +1,21 @@
-use std::sync::Arc;
+use std::{io::Cursor, sync::Arc};
 
 use anyhow::Result;
-use axum::Router;
+use axum::{Router, middleware};
+use dictionary::Dictionary;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
-use tracing::info;
+use tracing::{Level, info};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
 use crate::{
     configuration::{APP_NAME, Settings},
     database, routes,
-    telemetry::RequestSpan,
+    telemetry::{self, RequestSpan},
+    util,
 };
 
 pub struct Application {
@@ -37,9 +39,17 @@ impl Application {
 
         let (router, _) = router().split_for_parts();
 
-        let state = Arc::new(AppStateInternal {
-            db_pool: database::create_pool(&config.database),
-        });
+        let state = {
+            let db_pool = database::create_pool(&config.database);
+
+            let dict = include_str!("../../static/dictionary.json");
+            let dictionary = Arc::new(Dictionary::load(Cursor::new(dict))?);
+
+            Arc::new(AppStateInternal {
+                db_pool,
+                dictionary,
+            })
+        };
 
         Ok(Self {
             state,
@@ -64,11 +74,19 @@ struct Api;
 
 pub fn router() -> OpenApiRouter<AppState> {
     let middleware = ServiceBuilder::new()
-        .layer(TraceLayer::new_for_http().make_span_with(RequestSpan::default()));
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(RequestSpan::new().level(Level::INFO))
+                // BunyanFormattingLayer already logs on span enter/exit
+                .on_request(())
+                .on_response(())
+                .on_failure(()),
+        )
+        .layer(middleware::from_fn(telemetry::log_server_failures))
+        .layer(middleware::map_response(util::obfuscate_client_failures));
 
     let router = OpenApiRouter::with_openapi(Api::openapi())
-        .routes(utoipa_axum::routes!(routes::health_check))
-        .nest("/game/multi_choice", routes::multi_choice::router())
+        .merge(routes::router())
         .layer(middleware);
 
     router
@@ -78,4 +96,5 @@ pub type AppState = Arc<AppStateInternal>;
 
 pub struct AppStateInternal {
     pub db_pool: PgPool,
+    pub dictionary: Arc<Dictionary>,
 }
