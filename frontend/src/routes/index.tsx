@@ -7,8 +7,8 @@ export const Route = createFileRoute('/')({
 function Home() {
   return (
     <>
-      <Link to="/game/multi_choice" className="border border-foreground p-2">
-        Go to /game/multi_choice
+      <Link to="/game/multiple-choice" className="border border-foreground p-2">
+        Go to /game/multiple-choice
       </Link>
     </>
   );

@@ -1,4 +1,5 @@
 import { InGameLayout } from '../-components/InGameLayout';
+import { Stats } from '../-components/Stats';
 import { useQuiz } from '../-hooks/useQuiz';
 import { CreateGameMenu } from './-components/CreateGameMenu';
 import { Game } from './-components/Game';
@@ -16,35 +17,41 @@ function RouteComponent() {
 
   // TODO: Remove me
   useEffect(() => {
-    initQuiz?.({
-      questions: [
-        {
-          prompt:
-            'This is a very very long prompt that takes many words and spans a long line of text',
-          choices: [
-            'Choice A',
-            'This is a very very long choice that takes many characters',
-            'Choice C',
-            'Choice D',
-          ],
-          answer_idx: 1,
-          word_pair: {
-            id: 'id',
-            kana: 'Kana',
-            kanji: 'Kanji',
-            level: 'N1',
-            senses: [
-              {
-                glossary: ['gloss1', 'gloss2'],
-                partsOfSpeech: ['noun'],
-              },
-            ],
-          },
-        },
+    const q1: MultiChoiceQuestion = {
+      prompt:
+        'This is a very very long prompt that takes many words and spans a long line of text',
+      choices: [
+        'Choice A',
+        'This is a very very long choice that takes many characters',
+        'Choice C',
+        'Choice D',
       ],
+      answer_idx: 1,
+      word_pair: {
+        id: 'id',
+        kana: 'Kana',
+        kanji: 'Kanji',
+        level: 'N1',
+        senses: [
+          {
+            glossary: ['gloss1', 'gloss2'],
+            partsOfSpeech: ['noun'],
+          },
+        ],
+      },
+    };
+    return;
+    initQuiz?.({
+      questions: [q1],
       mode: 'kanatoeng',
       levels: ['N1'],
       categories: ['nouns', 'verbs'],
+    });
+    return;
+    submitAnswer?.({
+      elapsed: 120,
+      guesses: 3,
+      source: q1,
     });
   }, [initQuiz]);
 
@@ -63,7 +70,7 @@ function RouteComponent() {
           />
         );
       case 'post':
-        return 'Game Finished';
+        return <Stats stats={stats} />;
     }
   })();
 
