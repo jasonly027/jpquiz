@@ -1,9 +1,10 @@
 import type { QuizInState, QuizMeta } from '../../-hooks/useQuiz';
 import { useTimer } from '../../-hooks/useTimer';
 import {
-  isJapanesePrompt,
-  isJapaneseChoices,
   formatTime,
+  formatAccuracy,
+  getGamePromptFont,
+  getGameChoicesFont,
 } from '../../-lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -12,19 +13,19 @@ import { ArrowRightDoubleIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useState } from 'react';
 
-export interface GameProps {
+export interface MultiChoiceGameProps {
   question: MultiChoiceQuestion;
   currentIndex: number;
   meta: QuizMeta<MultiChoiceQuestion>;
   submitAnswer: QuizInState<MultiChoiceQuestion>['submitAnswer'];
 }
 
-export function Game({
+export function MultiChoiceGame({
   question,
   currentIndex,
   meta,
   submitAnswer,
-}: GameProps) {
+}: MultiChoiceGameProps) {
   const [guesses, setGuesses] = useState(0);
 
   const [didGuessChoice, setDidGuessChoice] = useState<boolean[]>(
@@ -63,15 +64,8 @@ export function Game({
     });
   };
 
-  const promptFont = isJapanesePrompt(meta.mode)
-    ? 'font-game-jp font-normal'
-    : 'font-game-eng font-bold';
-  const choicesFont = isJapaneseChoices(meta.mode)
-    ? 'font-game-jp font-normal'
-    : 'font-game-eng font-bold';
-
   return (
-    <div className="flex w-full max-w-4xl flex-col gap-1 font-game-eng font-semibold">
+    <div className="flex w-full max-w-4xl flex-col gap-1 font-semibold">
       <div className="flex w-full flex-row flex-wrap justify-between px-4 *:grow *:text-nowrap">
         <span className="text-left">{guesses} Guesses</span>
         <span className="text-center">{timeStr}</span>
@@ -82,11 +76,12 @@ export function Game({
       <Card className="gap-0 pb-2">
         <CardContent className="flex flex-col items-center gap-6 text-xl">
           <div
-            className={`${promptFont} m-2 line-clamp-4 max-w-[30ch] text-center`}
+            className={`${getGamePromptFont(meta.mode)} m-2 line-clamp-4 max-w-[30ch] text-center`}
           >
             {question.prompt}
           </div>
         </CardContent>
+
         <CardFooter className="justify-between pr-3 pl-5">
           <span className="text-muted-foreground">
             Question {currentIndex + 1} of {meta.questions.length}
@@ -115,7 +110,7 @@ export function Game({
             onClick={() => onGuess(idx)}
             disabled={didGuessChoice[idx]}
             size="lg"
-            className={`${choicesFont} line-clamp-4 h-[4.5lh] whitespace-normal`}
+            className={`${getGameChoicesFont(meta.mode)} line-clamp-4 h-[4.5lh] whitespace-normal`}
           >
             {choice}
           </Button>
@@ -124,14 +119,3 @@ export function Game({
     </div>
   );
 }
-
-function formatAccuracy(value: number): string {
-  if (isNaN(value)) return 'N/A';
-  if (!isFinite(value)) return '100%';
-  return percentFormatter.format(value);
-}
-
-const percentFormatter = new Intl.NumberFormat(undefined, {
-  style: 'percent',
-  maximumFractionDigits: 1,
-});

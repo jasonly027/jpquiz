@@ -52,6 +52,18 @@ export function isJapaneseChoices(mode: GameMode) {
   }
 }
 
+export function getGamePromptFont(mode: GameMode) {
+  return isJapanesePrompt(mode)
+    ? 'font-game-jp font-normal'
+    : 'font-game-eng font-bold';
+}
+
+export function getGameChoicesFont(mode: GameMode) {
+  return isJapaneseChoices(mode)
+    ? 'font-game-jp font-normal'
+    : 'font-game-eng font-bold';
+}
+
 export function formatTime(secs: number): string {
   const hours = Math.floor(secs / 3600);
   const minutes = Math.floor((secs % 3600) / 60);
@@ -61,3 +73,14 @@ export function formatTime(secs: number): string {
     .map((v) => String(v).padStart(2, '0'))
     .join(':');
 }
+
+export function formatAccuracy(value: number): string {
+  if (isNaN(value)) return 'N/A';
+  if (!isFinite(value)) return '100%';
+  return percentFormatter.format(value);
+}
+
+const percentFormatter = new Intl.NumberFormat(undefined, {
+  style: 'percent',
+  maximumFractionDigits: 1,
+});

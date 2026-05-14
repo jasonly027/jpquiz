@@ -1,6 +1,7 @@
 import { gameMutationOptions } from '../-hooks/useGameMutation';
 import type { QuizPreState } from '../../-hooks/useQuiz';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Combobox,
   ComboboxChip,
@@ -42,11 +43,13 @@ import React, {
   type SubmitEventHandler,
 } from 'react';
 
-export interface CreateGameMenuProps {
+export interface CreateMultiChoiceGameProps {
   initQuiz: QuizPreState<MultiChoiceQuestion>['initQuiz'];
 }
 
-export function CreateGameMenu({ initQuiz }: CreateGameMenuProps) {
+export function CreateMultiChoiceGame({
+  initQuiz,
+}: CreateMultiChoiceGameProps) {
   const [mode, setMode] = useState<GameMode>();
   const [levels, setLevels] = useState<NLevel[]>();
   const [categories, setCategories] = useState<PartOfSpeechCategory[]>();
@@ -73,64 +76,68 @@ export function CreateGameMenu({ initQuiz }: CreateGameMenuProps) {
   };
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="w-full max-w-xl rounded-lg border-5 border-card-foreground/10 p-6 font-game-eng"
-    >
-      <FieldSet className="grow">
-        <FieldLegend className="w-full text-center font-bold">
-          Create a Game
-        </FieldLegend>
+    <Card variant="outline" className="w-full max-w-xl">
+      <CardContent>
+        <form onSubmit={onSubmit}>
+          <FieldSet className="grow">
+            <FieldLegend className="w-full text-center font-semibold">
+              Create a Game
+            </FieldLegend>
 
-        <FieldGroup>
-          {/* Game Mode selector */}
-          <Field orientation="responsive">
-            <FieldLabel htmlFor="gameModeSelect" className="flex-1 text-nowrap">
-              Game Mode
-            </FieldLabel>
+            <FieldGroup>
+              {/* Game Mode selector */}
+              <Field orientation="responsive">
+                <FieldLabel
+                  htmlFor="gameModeSelect"
+                  className="flex-1 text-nowrap"
+                >
+                  Game Mode
+                </FieldLabel>
 
-            <div>
-              <GameModeComboBox id="gameModeSelect" setMode={setMode} />
-            </div>
-          </Field>
+                <div>
+                  <GameModeComboBox id="gameModeSelect" setMode={setMode} />
+                </div>
+              </Field>
 
-          {/* NLevel selector */}
-          <Field orientation="responsive">
-            <FieldLabel htmlFor="nLevelCombo" className="text-nowrap">
-              JLPT NLevel
-            </FieldLabel>
+              {/* NLevel selector */}
+              <Field orientation="responsive">
+                <FieldLabel htmlFor="nLevelCombo" className="text-nowrap">
+                  JLPT NLevel
+                </FieldLabel>
 
-            <div className="max-w-58 flex-1/4">
-              <NLevelComboBox id="nLevelCombo" setLevels={setLevels} />
-            </div>
-          </Field>
+                <div className="max-w-58 flex-1/4">
+                  <NLevelComboBox id="nLevelCombo" setLevels={setLevels} />
+                </div>
+              </Field>
 
-          {/* Category selector */}
-          <Field orientation="responsive">
-            <FieldLabel htmlFor="categoryCombo" className="text-nowrap">
-              Categories
-            </FieldLabel>
+              {/* Category selector */}
+              <Field orientation="responsive">
+                <FieldLabel htmlFor="categoryCombo" className="text-nowrap">
+                  Categories
+                </FieldLabel>
 
-            <div className="max-w-58 flex-1/4">
-              <CategoryComboBox
-                id="categoryCombo"
-                setCategories={setCategories}
-              />
-            </div>
-          </Field>
+                <div className="max-w-58 flex-1/4">
+                  <CategoryComboBox
+                    id="categoryCombo"
+                    setCategories={setCategories}
+                  />
+                </div>
+              </Field>
 
-          {/* Submit */}
-          <Field>
-            <Button
-              disabled={gameMutation.isPending}
-              className="max-w-40 self-center"
-            >
-              Create Game
-            </Button>
-          </Field>
-        </FieldGroup>
-      </FieldSet>
-    </form>
+              {/* Submit */}
+              <Field>
+                <Button
+                  disabled={gameMutation.isPending}
+                  className="max-w-40 self-center"
+                >
+                  Create Game
+                </Button>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

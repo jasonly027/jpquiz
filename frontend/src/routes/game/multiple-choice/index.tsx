@@ -1,8 +1,8 @@
 import { InGameLayout } from '../-components/InGameLayout';
-import { Stats } from '../-components/Stats';
 import { useQuiz } from '../-hooks/useQuiz';
-import { CreateGameMenu } from './-components/CreateGameMenu';
-import { Game } from './-components/Game';
+import { CreateMultiChoiceGame } from './-components/CreateMultiChoiceGame';
+import { MultiChoiceGame } from './-components/MultiChoiceGame';
+import { MultiChoiceStats } from './-components/MultiChoiceStats';
 import type { MultiChoiceQuestion } from '@/lib/models';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
@@ -40,17 +40,15 @@ function RouteComponent() {
         ],
       },
     };
-    return;
     initQuiz?.({
       questions: [q1],
       mode: 'kanatoeng',
       levels: ['N1'],
       categories: ['nouns', 'verbs'],
     });
-    return;
     submitAnswer?.({
       elapsed: 120,
-      guesses: 3,
+      guesses: Infinity,
       source: q1,
     });
   }, [initQuiz]);
@@ -58,10 +56,10 @@ function RouteComponent() {
   const content = (() => {
     switch (state) {
       case 'pre':
-        return <CreateGameMenu initQuiz={initQuiz} />;
+        return <CreateMultiChoiceGame initQuiz={initQuiz} />;
       case 'in':
         return (
-          <Game
+          <MultiChoiceGame
             key={currentIndex}
             question={question}
             currentIndex={currentIndex}
@@ -70,7 +68,7 @@ function RouteComponent() {
           />
         );
       case 'post':
-        return <Stats stats={stats} />;
+        return <MultiChoiceStats stats={stats} meta={meta} />;
     }
   })();
 
