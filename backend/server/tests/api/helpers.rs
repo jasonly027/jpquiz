@@ -27,7 +27,7 @@ pub async fn test_router() -> Router {
     let db_pool = test_pool(&config.database).await;
     let state = Arc::new(AppStateInternal { db_pool });
 
-    let (router, _) = application::router().split_for_parts();
+    let (router, _) = application::router(&config.application).split_for_parts();
 
     router.with_state(state)
 }

@@ -1,5 +1,6 @@
 application:
   host: 127.0.0.1
+  client_origin: http://localhost:5173
 database:
   host: localhost
   port: 5432

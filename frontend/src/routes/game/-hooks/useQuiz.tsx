@@ -21,6 +21,7 @@ interface QuizStateShell {
   stats: undefined;
   initQuiz: undefined;
   submitAnswer: undefined;
+  reset: undefined;
 }
 
 interface QuizPreStateShape<T> {
@@ -49,6 +50,8 @@ interface QuizPostStateShape<T> {
   currentIndex: number;
   meta: Readonly<QuizMeta<T>>;
   stats: QuestionStat<T>[];
+  initQuiz(data: QuizMeta<T>): void;
+  reset: () => void;
 }
 export type QuizPostState<T> = QuizPostStateShape<T> & {
   [K in Exclude<keyof QuizStateShell, keyof QuizPostStateShape<T>>]?: undefined;
@@ -78,7 +81,12 @@ export function useQuiz<T>(): UseQuizValue<T> {
     [isComplete]
   );
 
-  if (meta === undefined || currentIndex === undefined) {
+  const reset = useCallback(() => {
+    setMeta(undefined);
+    setCurrentIndex(0);
+  }, []);
+
+  if (meta === undefined) {
     return {
       state: 'pre',
       initQuiz,
@@ -102,5 +110,7 @@ export function useQuiz<T>(): UseQuizValue<T> {
     meta: meta,
     currentIndex,
     stats,
+    initQuiz,
+    reset,
   };
 }

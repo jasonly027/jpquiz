@@ -56,7 +56,7 @@ struct GetGameResponse {
     params(GetGameQuery),
     responses(
         (status = OK, body = inline(GetGameResponse)),
-        (status = NOT_FOUND, description = "No questions matching filters"),
+        (status = NOT_FOUND, description = "No questions matching filters", body = str),
     )
 )]
 #[tracing::instrument(name = "Create multiple choice game", skip(ctx))]

@@ -98,7 +98,13 @@ fn extract_prompt(mode: GameMode, pair: &WordPair) -> Result<String, CreateQuest
     use GameMode as GM;
 
     match mode {
-        GM::EngToKana | GM::EngToKanji => extract_eng(pair),
+        GM::EngToKana | GM::EngToKanji => {
+            let gloss = extract_glossary(pair)?;
+            if gloss.is_empty() {
+                return Err(Cr::MissingGlossary(pair.clone()));
+            }
+            Ok(gloss.join("; "))
+        }
         GM::KanaToKanji | GM::KanaToEng => Ok(pair.kana.clone()),
         GM::KanjiToKana | GM::KanjiToEng => pair
             .kanji
@@ -117,20 +123,23 @@ fn extract_answer(mode: GameMode, pair: &WordPair) -> Result<String, CreateQuest
             .kanji
             .clone()
             .ok_or_else(|| Cr::MissingKanji(pair.clone())),
-        GM::KanaToEng | GM::KanjiToEng => extract_eng(pair),
+        GM::KanaToEng | GM::KanjiToEng => {
+            let gloss = extract_glossary(pair)?;
+            if gloss.is_empty() {
+                return Err(Cr::MissingGlossary(pair.clone()));
+            }
+            Ok(gloss[0].clone())
+        }
     }
 }
 
-fn extract_eng(pair: &WordPair) -> Result<String, CreateQuestionError> {
+fn extract_glossary(pair: &WordPair) -> Result<Vec<String>, CreateQuestionError> {
     use CreateQuestionError as Cr;
 
     let sense = pair
         .senses
         .choose(&mut rand::rng())
         .ok_or_else(|| Cr::MissingSense(pair.clone()))?;
-    if sense.glossary.is_empty() {
-        Err(Cr::MissingGlossary(pair.clone()))
-    } else {
-        Ok(sense.glossary.join("; "))
-    }
+
+    Ok(sense.glossary.clone())
 }

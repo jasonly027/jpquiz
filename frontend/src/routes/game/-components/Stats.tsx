@@ -1,6 +1,10 @@
 import type { QuestionStat } from '../-lib/models';
 import { formatAccuracy, formatTime } from '../-lib/utils';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { BookOpenIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import React, { useContext } from 'react';
 import { createContext, useMemo } from 'react';
 
@@ -90,34 +94,89 @@ export function StatsRowContainer({ children }: StatsRowContainerProps) {
   return <div className="flex flex-col gap-6">{children}</div>;
 }
 
-export interface StatsRowProps<T> {
-  stats: QuestionStat<T>;
-  idx: number;
-  children: (data: T) => React.ReactNode;
+export interface StatsRowProps {
+  children?: React.ReactNode;
 }
 
-export function StatsRow<T>({ stats, idx, children }: StatsRowProps<T>) {
+export function StatsRow({ children }: StatsRowProps) {
   return (
-    <div
-      key={idx}
-      className="group flex flex-col divide-card-foreground/10 overflow-hidden rounded-lg border-l-4 bg-card ring ring-card-foreground/15 odd:border-primary even:border-secondary max-sm:divide-y-2 sm:flex-row sm:divide-x-2"
-    >
-      <div className="flex items-center justify-center p-6 text-lg font-semibold group-odd:bg-primary/15 group-even:bg-secondary/15">
-        Q{idx + 1}
-      </div>
+    <Card className="flex flex-col gap-0 divide-card-foreground/10 border-primary p-0 max-sm:divide-y-2 max-sm:border-t-4 sm:flex-row sm:divide-x-2 sm:border-l-4">
+      {children}
+    </Card>
+  );
+}
 
-      <div className="grow">{children(stats.source)}</div>
+export interface StatsRowQuestionCounterProps {
+  count: number;
+}
 
-      <div className="flex flex-row divide-card-foreground/10 *:flex *:flex-1 *:items-center *:justify-center *:px-4 *:py-1.5 *:text-nowrap max-sm:divide-x-2 sm:flex-col sm:divide-y-2">
-        <div
-          data-skipped={isFinite(stats.guesses)}
-          className="min-w-20 data-skipped:italic"
-        >
-          {isFinite(stats.guesses) ? `${stats.guesses} Guesses` : 'Skipped'}
-        </div>
-        <div>{stats.elapsed}s</div>
+export function StatsRowQuestionCounter({
+  count,
+}: StatsRowQuestionCounterProps) {
+  return (
+    <h3 className="flex items-center justify-center bg-primary/15 p-6 text-lg font-semibold">
+      Q{count}
+    </h3>
+  );
+}
+
+export interface StatsRowGenericStatsProps {
+  stats: Omit<QuestionStat<unknown>, 'source'>;
+}
+
+export function StatsRowGenericStats({ stats }: StatsRowGenericStatsProps) {
+  return (
+    <div className="flex flex-row divide-card-foreground/10 *:flex *:flex-1 *:items-center *:justify-center *:px-4 *:py-1.5 *:text-nowrap max-sm:divide-x-2 sm:flex-col sm:divide-y-2">
+      <div
+        data-skipped={isFinite(stats.guesses)}
+        className="min-w-20 data-skipped:italic"
+      >
+        {isFinite(stats.guesses) ? `${stats.guesses} Guesses` : 'Skipped'}
       </div>
+      <div>{stats.elapsed}s</div>
     </div>
+  );
+}
+
+export interface StatsRowActionsProps {
+  children?: React.ReactNode;
+}
+
+export function StatsRowActions({ children }: StatsRowActionsProps) {
+  return (
+    <div className="flex flex-row items-center justify-center gap-3 p-1 sm:flex-col">
+      {children}
+    </div>
+  );
+}
+
+export interface StatsRowJishoButtonProps {
+  search: string;
+  className?: string;
+}
+
+export function StatsRowJishoButton({
+  search,
+  className,
+}: StatsRowJishoButtonProps) {
+  const href = `http://jisho.org/search/${search}`;
+
+  return (
+    <Button
+      asChild
+      variant="outline"
+      size="icon-sm"
+      className={cn(`rounded-full`, className)}
+    >
+      <a href={href} target="_blank" rel="noreferrer">
+        <HugeiconsIcon
+          icon={BookOpenIcon}
+          size={24}
+          color="currentColor"
+          strokeWidth={1.5}
+        />
+      </a>
+    </Button>
   );
 }
 

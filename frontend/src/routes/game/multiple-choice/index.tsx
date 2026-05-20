@@ -12,11 +12,11 @@ export const Route = createFileRoute('/game/multiple-choice/')({
 });
 
 function RouteComponent() {
-  const { state, initQuiz, question, currentIndex, meta, stats, submitAnswer } =
-    useQuiz<MultiChoiceQuestion>();
+  const quizState = useQuiz<MultiChoiceQuestion>();
 
   // TODO: Remove me
   useEffect(() => {
+    return;
     const q1: MultiChoiceQuestion = {
       prompt:
         'This is a very very long prompt that takes many words and spans a long line of text',
@@ -29,8 +29,8 @@ function RouteComponent() {
       answer_idx: 1,
       word_pair: {
         id: 'id',
-        kana: 'Kana',
-        kanji: 'Kanji',
+        kana: 'はんのう',
+        kanji: '反応',
         level: 'N1',
         senses: [
           {
@@ -40,35 +40,27 @@ function RouteComponent() {
         ],
       },
     };
-    initQuiz?.({
+    quizState.initQuiz?.({
       questions: [q1],
       mode: 'kanatoeng',
       levels: ['N1'],
       categories: ['nouns', 'verbs'],
     });
-    submitAnswer?.({
+    quizState.submitAnswer?.({
       elapsed: 120,
       guesses: Infinity,
       source: q1,
     });
-  }, [initQuiz]);
+  }, []);
 
   const content = (() => {
-    switch (state) {
+    switch (quizState.state) {
       case 'pre':
-        return <CreateMultiChoiceGame initQuiz={initQuiz} />;
+        return <CreateMultiChoiceGame {...quizState} />;
       case 'in':
-        return (
-          <MultiChoiceGame
-            key={currentIndex}
-            question={question}
-            currentIndex={currentIndex}
-            meta={meta}
-            submitAnswer={submitAnswer}
-          />
-        );
+        return <MultiChoiceGame key={quizState.currentIndex} {...quizState} />;
       case 'post':
-        return <MultiChoiceStats stats={stats} meta={meta} />;
+        return <MultiChoiceStats {...quizState} />;
     }
   })();
 

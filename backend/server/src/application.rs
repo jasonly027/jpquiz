@@ -3,16 +3,17 @@ use std::{io::Cursor, sync::Arc};
 use anyhow::Result;
 use axum::{Router, middleware};
 use dictionary::Dictionary;
+use http::{HeaderValue, Method};
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing::{Level, info};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
 use crate::{
-    configuration::{APP_NAME, Settings},
+    configuration::{APP_NAME, ApplicationSettings, Settings},
     database, routes,
     telemetry::{self, RequestSpan},
     util,
@@ -37,7 +38,7 @@ impl Application {
 
         info!("Serving at http://{}", address);
 
-        let (router, _) = router().split_for_parts();
+        let (router, _) = router(&config.application).split_for_parts();
 
         let state = {
             let db_pool = database::create_pool(&config.database);
@@ -72,7 +73,7 @@ impl Application {
 #[openapi(info(title = APP_NAME))]
 struct Api;
 
-pub fn router() -> OpenApiRouter<AppState> {
+pub fn router(config: &ApplicationSettings) -> OpenApiRouter<AppState> {
     let middleware = ServiceBuilder::new()
         .layer(
             TraceLayer::new_for_http()
@@ -83,6 +84,11 @@ pub fn router() -> OpenApiRouter<AppState> {
                 .on_failure(()),
         )
         .layer(middleware::from_fn(telemetry::log_server_failures))
+        .layer(
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST])
+                .allow_origin(config.client_origin.parse::<HeaderValue>().unwrap()),
+        )
         .layer(middleware::map_response(util::obfuscate_client_failures));
 
     let router = OpenApiRouter::with_openapi(Api::openapi())

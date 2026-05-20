@@ -43,7 +43,7 @@ export const getGetGameQueryKey = (params?: GetGameParams) => {
 
 export const getGetGameQueryOptions = <
   TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<number | string>,
 >(
   params: GetGameParams,
   options?: {
@@ -71,11 +71,11 @@ export const getGetGameQueryOptions = <
 export type GetGameQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGame>>
 >;
-export type GetGameQueryError = ErrorType<void>;
+export type GetGameQueryError = ErrorType<number | string>;
 
 export function useGetGame<
   TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<number | string>,
 >(
   params: GetGameParams,
   options: {
@@ -98,7 +98,7 @@ export function useGetGame<
 };
 export function useGetGame<
   TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<number | string>,
 >(
   params: GetGameParams,
   options?: {
@@ -121,7 +121,7 @@ export function useGetGame<
 };
 export function useGetGame<
   TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<number | string>,
 >(
   params: GetGameParams,
   options?: {
@@ -137,7 +137,7 @@ export function useGetGame<
 
 export function useGetGame<
   TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<number | string>,
 >(
   params: GetGameParams,
   options?: {

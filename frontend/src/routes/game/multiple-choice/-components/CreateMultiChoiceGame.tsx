@@ -43,9 +43,7 @@ import React, {
   type SubmitEventHandler,
 } from 'react';
 
-export interface CreateMultiChoiceGameProps {
-  initQuiz: QuizPreState<MultiChoiceQuestion>['initQuiz'];
-}
+export type CreateMultiChoiceGameProps = QuizPreState<MultiChoiceQuestion>;
 
 export function CreateMultiChoiceGame({
   initQuiz,
@@ -65,7 +63,7 @@ export function CreateMultiChoiceGame({
       });
     },
     onError(error) {
-      console.log(error);
+      console.error(error);
     },
   });
 

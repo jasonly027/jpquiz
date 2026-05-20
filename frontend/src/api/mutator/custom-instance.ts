@@ -1,7 +1,10 @@
 import Axios, { AxiosError, type AxiosRequestConfig } from 'axios';
 
 export const AXIOS_INSTANCE = Axios.create({
-  baseURL: process.env['VITE_APP_BACKEND_URL'],
+  baseURL: import.meta.env['VITE_APP_BACKEND_URL'],
+  paramsSerializer: {
+    indexes: null,
+  },
 });
 
 export const customInstance = <T>(

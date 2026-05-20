@@ -7,6 +7,7 @@
       "dependencies": {
         "@base-ui/react": "^1.4.1",
         "@fontsource-variable/gabarito": "^5.2.8",
+        "@fontsource-variable/noto-sans-jp": "^5.2.10",
         "@fontsource/fredoka-one": "^5.2.5",
         "@fontsource/mochiy-pop-one": "^5.2.8",
         "@hugeicons/core-free-icons": "^4.1.2",
@@ -214,6 +215,8 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
 
     "@fontsource-variable/gabarito": ["@fontsource-variable/gabarito@5.2.8", "", {}, "sha512-wIAwvNwzfoYMm4iisswaUYgCxDWFe6JdKDL1gjgUjYe7LU1u/zjGekEigJgkabvMgZbWyJjkRNCb2gJlcMxvpg=="],
+
+    "@fontsource-variable/noto-sans-jp": ["@fontsource-variable/noto-sans-jp@5.2.10", "", {}, "sha512-m0XfZ38rZtCaGAuAQL0cBPQ6fc/RguYEOqw66zvuLOV9vNRUBf9MFqyoazTu2JVCRIcnkrxbwF29UUaHHgTKdg=="],
 
     "@fontsource/fredoka-one": ["@fontsource/fredoka-one@5.2.5", "", {}, "sha512-Fan2k5pTOmmN8eydeUOk20/NALW+qtRu6WdqPBNhFq2WaquxKpBMUzdxFXgy9asICtbEhxTM51XHeU+OKfPQnQ=="],
 

@@ -5,6 +5,7 @@
 @import '@fontsource/fredoka-one';
 @import '@fontsource-variable/gabarito/wght.css';
 @import '@fontsource/mochiy-pop-one';
+@import '@fontsource-variable/noto-sans-jp/wght.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -18,7 +19,7 @@
   --primary: oklch(0.7689 0.1979 335.5254);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9042 0.1175 199.9681);
-  --secondary-foreground: oklch(0 0 0);
+  --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.9674 0.0013 286.3752);
   --muted-foreground: oklch(0.5517 0.0138 285.9385);
   --accent: oklch(0.9042 0.1175 199.9681);
@@ -78,7 +79,7 @@
   --primary: oklch(0.7689 0.1979 335.5254);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9042 0.1175 199.9681);
-  --secondary-foreground: oklch(0 0 0);
+  --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.2795 0.0368 260.031);
   --muted-foreground: oklch(0.7107 0.0351 256.7878);
   --accent: oklch(0.9042 0.1175 199.9681);
@@ -185,9 +186,10 @@
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 
-  --font-game-title: 'Fredoka One', var(--font-sans);
-  --font-game-eng: Gabarito, var(--font-sans);
-  --font-game-jp: 'Mochiy Pop One', var(--font-sans);
+  --font-game-title: 'Fredoka One', sans-serif;
+  --font-game-eng: Gabarito, sans-serif;
+  --font-game-jp: 'Mochiy Pop One', sans-serif;
+  --font-jp: 'Noto Sans JP Variable', sans-serif;
 }
 
 @layer base {

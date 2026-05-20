@@ -131,7 +131,9 @@ fn generate_api() -> Result<()> {
         .truncate(true)
         .open(api_path)?;
 
-    let (_router, api) = server::application::router().split_for_parts();
+    let config = server::configuration::get()?;
+
+    let (_router, api) = server::application::router(&config.application).split_for_parts();
 
     let api_json = api.to_pretty_json()?;
 

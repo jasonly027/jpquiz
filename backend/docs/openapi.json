@@ -69,7 +69,14 @@
             }
           },
           "404": {
-            "description": "No questions matching filters"
+            "description": "No questions matching filters",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }

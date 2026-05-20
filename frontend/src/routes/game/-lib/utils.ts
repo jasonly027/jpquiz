@@ -82,5 +82,6 @@ export function formatAccuracy(value: number): string {
 
 const percentFormatter = new Intl.NumberFormat(undefined, {
   style: 'percent',
+  minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 });

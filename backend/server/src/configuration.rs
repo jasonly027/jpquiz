@@ -15,6 +15,7 @@ pub struct Settings {
 pub struct ApplicationSettings {
     pub host: String,
     pub port: u16,
+    pub client_origin: String,
 }
 
 #[derive(serde::Deserialize, Clone)]
