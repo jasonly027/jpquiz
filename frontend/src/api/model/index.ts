@@ -6,8 +6,8 @@
  */
 
 export * from './gameMode';
-export * from './getGame200';
-export * from './getGameParams';
+export * from './getMultiChoice200';
+export * from './getMultiChoiceParams';
 export * from './multiChoiceQuestion';
 export * from './nLevelDto';
 export * from './partOfSpeechCategoryDto';

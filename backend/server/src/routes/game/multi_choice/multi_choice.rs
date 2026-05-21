@@ -3,7 +3,7 @@ use axum_extra::extract::Query;
 use dictionary::{WordPair, filters};
 use rand::seq::IteratorRandom;
 use serde::{Deserialize, Serialize};
-use server_derive::ResponseError;
+use server_derive::ToResponseError;
 use std::collections::HashSet;
 use thiserror::Error;
 use utoipa::{IntoParams, OpenApi, ToSchema};
@@ -23,7 +23,7 @@ use crate::{
 struct Api;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::with_openapi(Api::openapi()).routes(routes!(get_game))
+    OpenApiRouter::with_openapi(Api::openapi()).routes(routes!(get_multi_choice))
 }
 
 #[derive(Debug, Deserialize, IntoParams)]
@@ -34,10 +34,10 @@ struct GetGameQuery {
     pos: HashSet<PartOfSpeechCategoryDto>,
 }
 
-#[derive(Debug, Error, ResponseError)]
+#[derive(Debug, Error, ToResponseError)]
 enum GetGameError {
     #[error("not enough pairs to create questions with provided filter(s)")]
-    #[response(status = NOT_FOUND, log = false)]
+    #[response(status = UNPROCESSABLE_ENTITY, log = false)]
     BadQueryCombination,
 
     #[error("failed to create questions, at least one failed")]
@@ -56,11 +56,12 @@ struct GetGameResponse {
     params(GetGameQuery),
     responses(
         (status = OK, body = inline(GetGameResponse)),
-        (status = NOT_FOUND, description = "No questions matching filters", body = str),
+        (status = UNPROCESSABLE_ENTITY, body = str),
+        (status = INTERNAL_SERVER_ERROR, body = str),
     )
 )]
 #[tracing::instrument(name = "Create multiple choice game", skip(ctx))]
-async fn get_game(
+async fn get_multi_choice(
     State(ctx): State<AppState>,
     Query(query): Query<GetGameQuery>,
 ) -> Result<Json<GetGameResponse>, GetGameError> {

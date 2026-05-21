@@ -4,18 +4,21 @@
  * jpquiz
  * OpenAPI spec version: 0.1.0
  */
-import type { GetGame200, GetGameParams } from './model';
-import { customInstance } from './mutator/custom-instance';
-import type { ErrorType } from './mutator/custom-instance';
-import { useQuery } from '@tanstack/react-query';
+import type { GetMultiChoice200, GetMultiChoiceParams } from './model';
+import { customInstance } from './mutator/custom-axios';
+import type { ErrorType } from './mutator/custom-axios';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
@@ -26,152 +29,105 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getGame = (
-  params: GetGameParams,
+export const getMultiChoice = (
+  params: GetMultiChoiceParams,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal
 ) => {
-  return customInstance<GetGame200>(
-    { url: `/game/multi_choice`, method: 'GET', params, signal },
+  return customInstance<GetMultiChoice200>(
+    {
+      url: `${import.meta.env['VITE_APP_BACKEND_URL']}/game/multi_choice`,
+      method: 'GET',
+      params,
+      signal,
+    },
     options
   );
 };
 
-export const getGetGameQueryKey = (params?: GetGameParams) => {
-  return [`/game/multi_choice`, ...(params ? [params] : [])] as const;
-};
-
-export const getGetGameQueryOptions = <
-  TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<number | string>,
->(
-  params: GetGameParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  }
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getGetGameQueryKey(params);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof getGame>>> = ({
-    signal,
-  }) => getGame(params, requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getGame>>,
+export const getGetMultiChoiceMutationOptions = <
+  TError = ErrorType<string>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getMultiChoice>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+    { params: GetMultiChoiceParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof getMultiChoice>>,
+  TError,
+  { params: GetMultiChoiceParams },
+  TContext
+> => {
+  const mutationKey = ['getMultiChoice'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof getMultiChoice>>,
+    { params: GetMultiChoiceParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return getMultiChoice(params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type GetGameQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getGame>>
+export type GetMultiChoiceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof getMultiChoice>>
 >;
-export type GetGameQueryError = ErrorType<number | string>;
 
-export function useGetGame<
-  TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<number | string>,
+export type GetMultiChoiceMutationError = ErrorType<string>;
+
+export const useGetMultiChoice = <
+  TError = ErrorType<string>,
+  TContext = unknown,
 >(
-  params: GetGameParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getGame>>,
-          TError,
-          Awaited<ReturnType<typeof getGame>>
-        >,
-        'initialData'
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetGame<
-  TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<number | string>,
->(
-  params: GetGameParams,
   options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getGame>>,
-          TError,
-          Awaited<ReturnType<typeof getGame>>
-        >,
-        'initialData'
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetGame<
-  TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<number | string>,
->(
-  params: GetGameParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof getMultiChoice>>,
+      TError,
+      { params: GetMultiChoiceParams },
+      TContext
     >;
     request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
+): UseMutationResult<
+  Awaited<ReturnType<typeof getMultiChoice>>,
+  TError,
+  { params: GetMultiChoiceParams },
+  TContext
+> => {
+  return useMutation(getGetMultiChoiceMutationOptions(options), queryClient);
 };
-
-export function useGetGame<
-  TData = Awaited<ReturnType<typeof getGame>>,
-  TError = ErrorType<number | string>,
->(
-  params: GetGameParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof getGame>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetGameQueryOptions(params, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
 
 export const healthCheck = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal
 ) => {
   return customInstance<string>(
-    { url: `/health_check`, method: 'GET', signal },
+    {
+      url: `${import.meta.env['VITE_APP_BACKEND_URL']}/health_check`,
+      method: 'GET',
+      signal,
+    },
     options
   );
 };
 
 export const getHealthCheckQueryKey = () => {
-  return [`/health_check`] as const;
+  return [`${import.meta.env['VITE_APP_BACKEND_URL']}/health_check`] as const;
 };
 
 export const getHealthCheckQueryOptions = <

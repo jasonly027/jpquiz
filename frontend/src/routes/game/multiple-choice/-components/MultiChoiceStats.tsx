@@ -1,4 +1,3 @@
-import { gameMutationOptions } from '../-hooks/useGameMutation';
 import {
   Stats,
   StatsContent,
@@ -13,6 +12,7 @@ import {
 import type { QuizMeta, QuizPostState } from '../../-hooks/useQuiz';
 import type { QuestionStat } from '../../-lib/models';
 import { getGameChoicesFont, getGamePromptFont } from '../../-lib/utils';
+import { useGetMultiChoice } from '@/api/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -27,7 +27,6 @@ import {
   ArrowDownIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 
 export type MutliChoiceStatsProps = QuizPostState<MultiChoiceQuestion>;
@@ -38,26 +37,32 @@ export function MultiChoiceStats({
   initQuiz,
   reset,
 }: MutliChoiceStatsProps) {
-  const gameMutation = useMutation({
-    ...gameMutationOptions(),
-    onSuccess({ data: questions }, { mode, levels, pos: categories }) {
-      initQuiz({
-        questions,
-        mode,
-        levels,
-        categories,
-      });
-    },
-    onError(error) {
-      console.error(error);
+  const gameMutation = useGetMultiChoice({
+    mutation: {
+      onSuccess(
+        { data: questions },
+        { params: { mode, levels, pos: categories } }
+      ) {
+        initQuiz({
+          questions,
+          mode,
+          levels,
+          categories,
+        });
+      },
+      onError(error) {
+        console.error(error);
+      },
     },
   });
 
   const onPlayAgain = () => {
     gameMutation.mutate({
-      mode: meta.mode,
-      levels: meta.levels,
-      pos: meta.categories,
+      params: {
+        mode: meta.mode,
+        levels: meta.levels,
+        pos: meta.categories,
+      },
     });
   };
 

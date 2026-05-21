@@ -47,9 +47,11 @@ pub fn expand(ast: DeriveInput) -> TokenStream {
         let status = &v.status;
 
         let body = if v.status == "INTERNAL_SERVER_ERROR" {
-            quote! { "Something went wrong".to_string() }
+            quote! { Some("Something went wrong".to_string()) }
+        } else if v.status == "NO_CONTENT" {
+            quote! { None }
         } else {
-            quote! { self.to_string() }
+            quote! { Some(self.to_string()) }
         };
 
         let err = if v.log {
@@ -74,7 +76,10 @@ pub fn expand(ast: DeriveInput) -> TokenStream {
                     #(#arms),*
                 };
 
-                let mut response = (status, msg).into_response();
+                let mut response = match msg {
+                    Some(msg) => (status, msg).into_response(),
+                    None => status.into_response(),
+                };
                 if let Some(err) = err {
                     response
                         .extensions_mut()

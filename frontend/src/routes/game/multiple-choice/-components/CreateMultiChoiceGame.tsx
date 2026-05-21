@@ -1,5 +1,5 @@
-import { gameMutationOptions } from '../-hooks/useGameMutation';
 import type { QuizPreState } from '../../-hooks/useQuiz';
+import { useGetMultiChoice } from '@/api/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -35,7 +35,6 @@ import type {
   NLevel,
   PartOfSpeechCategory,
 } from '@/lib/models';
-import { useMutation } from '@tanstack/react-query';
 import React, {
   useState,
   type Dispatch,
@@ -52,25 +51,31 @@ export function CreateMultiChoiceGame({
   const [levels, setLevels] = useState<NLevel[]>();
   const [categories, setCategories] = useState<PartOfSpeechCategory[]>();
 
-  const gameMutation = useMutation({
-    ...gameMutationOptions(),
-    onSuccess({ data: questions }, { mode, levels, pos: categories }) {
-      initQuiz({
-        questions,
-        mode,
-        levels,
-        categories,
-      });
-    },
-    onError(error) {
-      console.error(error);
+  const getGame = useGetMultiChoice({
+    mutation: {
+      onSuccess(
+        { data: questions },
+        { params: { mode, levels, pos: categories } }
+      ) {
+        initQuiz({
+          questions,
+          mode,
+          levels,
+          categories,
+        });
+      },
+      onError(error) {
+        console.error(error);
+      },
     },
   });
+
+  // TODO: ADD ERRORS ON SUBMIT
 
   const onSubmit: SubmitEventHandler = (e) => {
     e.preventDefault();
     if (!mode || !levels || !categories) return;
-    gameMutation.mutate({ mode, levels, pos: categories });
+    getGame.mutate({ params: { mode, levels, pos: categories } });
   };
 
   return (
@@ -125,7 +130,7 @@ export function CreateMultiChoiceGame({
               {/* Submit */}
               <Field>
                 <Button
-                  disabled={gameMutation.isPending}
+                  disabled={getGame.isPending}
                   className="max-w-40 self-center"
                 >
                   Create Game

@@ -11,7 +11,7 @@
   "paths": {
     "/game/multi_choice": {
       "get": {
-        "operationId": "get_game",
+        "operationId": "get_multi_choice",
         "parameters": [
           {
             "name": "mode",
@@ -68,8 +68,18 @@
               }
             }
           },
-          "404": {
-            "description": "No questions matching filters",
+          "422": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
             "content": {
               "text/plain": {
                 "schema": {
