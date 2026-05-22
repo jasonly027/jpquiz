@@ -1,11 +1,11 @@
 import { SideBar } from '@/components/layouts/SideBar';
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/')({
-  component: Home,
+export const Route = createFileRoute('/about')({
+  component: RouteComponent,
 });
 
-function Home() {
+function RouteComponent() {
   return (
     <>
       <SideBar />

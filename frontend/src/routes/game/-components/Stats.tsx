@@ -164,7 +164,7 @@ export function StatsRowJishoButton({
   return (
     <Button
       asChild
-      variant="outline"
+      variant="ghost"
       size="icon-sm"
       className={cn(`rounded-full`, className)}
     >

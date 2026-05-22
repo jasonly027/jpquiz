@@ -16,7 +16,8 @@ function RouteComponent() {
 
   // TODO: Remove me
   useEffect(() => {
-    return;
+    if (quizState.state !== 'pre') return;
+
     const q1: MultiChoiceQuestion = {
       prompt:
         'This is a very very long prompt that takes many words and spans a long line of text',
@@ -40,16 +41,12 @@ function RouteComponent() {
         ],
       },
     };
+
     quizState.initQuiz?.({
       questions: [q1],
       mode: 'kanatoeng',
       levels: ['N1'],
       categories: ['nouns', 'verbs'],
-    });
-    quizState.submitAnswer?.({
-      elapsed: 120,
-      guesses: Infinity,
-      source: q1,
     });
   }, []);
 

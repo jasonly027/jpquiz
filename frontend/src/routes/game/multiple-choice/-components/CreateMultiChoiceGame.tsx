@@ -29,12 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
 import type {
   GameMode,
   MultiChoiceQuestion,
   NLevel,
   PartOfSpeechCategory,
 } from '@/lib/models';
+import { isAxiosError } from 'axios';
 import React, {
   useState,
   type Dispatch,
@@ -70,7 +72,15 @@ export function CreateMultiChoiceGame({
     },
   });
 
-  // TODO: ADD ERRORS ON SUBMIT
+  let getGameError: string | undefined;
+  if (getGame.error) {
+    if (isAxiosError(getGame.error) && getGame.error.status === 422) {
+      getGameError =
+        'Word pool is too small to create a game. Please try different settings.';
+    } else {
+      getGameError = 'Something went wrong. Please try again.';
+    }
+  }
 
   const onSubmit: SubmitEventHandler = (e) => {
     e.preventDefault();
@@ -130,15 +140,22 @@ export function CreateMultiChoiceGame({
               {/* Submit */}
               <Field>
                 <Button
+                  type="submit"
                   disabled={getGame.isPending}
                   className="max-w-40 self-center"
                 >
+                  {getGame.isPending && <Spinner data-icon="inline-start" />}
                   Create Game
                 </Button>
               </Field>
             </FieldGroup>
           </FieldSet>
         </form>
+        {getGameError && (
+          <div className="mt-3 text-center text-destructive">
+            {getGameError}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

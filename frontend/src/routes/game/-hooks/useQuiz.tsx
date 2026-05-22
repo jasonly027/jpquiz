@@ -14,48 +14,27 @@ export interface QuizMeta<T> {
   categories: PartOfSpeechCategory[];
 }
 
-interface QuizStateShell {
-  question: undefined;
-  currentIndex: undefined;
-  meta: undefined;
-  stats: undefined;
-  initQuiz: undefined;
-  submitAnswer: undefined;
-  reset: undefined;
-}
-
-interface QuizPreStateShape<T> {
+export interface QuizPreState<T> {
   state: 'pre';
   initQuiz(data: QuizMeta<T>): void;
 }
-export type QuizPreState<T> = QuizPreStateShape<T> & {
-  [K in Exclude<keyof QuizStateShell, keyof QuizPreStateShape<T>>]?: undefined;
-};
 
-interface QuizInStateShape<T> {
+export interface QuizInState<T> {
   state: 'in';
   question: Readonly<T>;
   currentIndex: number;
   meta: Readonly<QuizMeta<T>>;
-  stats: QuestionStat<T>[];
   submitAnswer(stat: QuestionStat<T>): void;
+  endQuiz(): void;
 }
-export type QuizInState<T> = QuizInStateShape<T> & {
-  [K in Exclude<keyof QuizStateShell, keyof QuizInStateShape<T>>]?: undefined;
-};
 
-interface QuizPostStateShape<T> {
+export interface QuizPostState<T> {
   state: 'post';
-  question: Readonly<T>;
-  currentIndex: number;
   meta: Readonly<QuizMeta<T>>;
   stats: QuestionStat<T>[];
   initQuiz(data: QuizMeta<T>): void;
   reset: () => void;
 }
-export type QuizPostState<T> = QuizPostStateShape<T> & {
-  [K in Exclude<keyof QuizStateShell, keyof QuizPostStateShape<T>>]?: undefined;
-};
 
 export function useQuiz<T>(): UseQuizValue<T> {
   const [meta, setMeta] = useState<QuizMeta<T>>();
@@ -81,6 +60,11 @@ export function useQuiz<T>(): UseQuizValue<T> {
     [isComplete]
   );
 
+  const endQuiz = useCallback(() => {
+    if (!meta) return;
+    setCurrentIndex(meta.questions.length);
+  }, [meta]);
+
   const reset = useCallback(() => {
     setMeta(undefined);
     setCurrentIndex(0);
@@ -99,16 +83,14 @@ export function useQuiz<T>(): UseQuizValue<T> {
       question: meta.questions[currentIndex]!,
       meta: meta,
       currentIndex,
-      stats,
       submitAnswer,
+      endQuiz,
     };
   }
 
   return {
     state: 'post',
-    question: meta.questions[currentIndex]!,
-    meta: meta,
-    currentIndex,
+    meta,
     stats,
     initQuiz,
     reset,
