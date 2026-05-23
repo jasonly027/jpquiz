@@ -11,7 +11,7 @@ export function InGameLayout({ title, children }: InGameLayoutProps) {
     <div className="flex flex-col sm:flex-row">
       <SideBar />
 
-      <main className="flex grow flex-col pb-15 font-game-eng">
+      <main className="flex min-h-screen grow flex-col pb-15 font-game-eng">
         <div className="m-6 flex flex-row justify-center">
           <h1 className="text-center font-game-title text-3xl tracking-tight">
             {title}

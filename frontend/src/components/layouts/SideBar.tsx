@@ -1,3 +1,11 @@
+import { useTheme } from '../hooks/ThemeProvider';
+import { Button } from '../ui/button';
+import {
+  Moon02Icon,
+  Settings03Icon,
+  Sun03Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
 import { Link } from '@tanstack/react-router';
 
 export function SideBar() {
@@ -7,7 +15,7 @@ export function SideBar() {
         StudyWard
       </div>
 
-      <nav className="flex flex-col gap-1.5 rounded-lg bg-background p-3 **:data-[status=active]:font-semibold **:data-[status=active]:text-primary [&_a]:hover:underline">
+      <nav className="flex flex-col gap-1.5 rounded-lg bg-background p-3 ring ring-foreground/15 **:data-[status=active]:font-semibold **:data-[status=active]:text-primary [&_a]:hover:underline">
         <Link to="/">Home</Link>
 
         <Link to="/about">About</Link>
@@ -21,6 +29,43 @@ export function SideBar() {
           </div>
         </div>
       </nav>
+
+      <div className="mt-auto flex justify-end">
+        <ThemeToggleButton />
+      </div>
     </aside>
+  );
+}
+
+function ThemeToggleButton() {
+  const { theme, setTheme } = useTheme();
+
+  const onClick = () => {
+    const next = theme !== 'dark' ? 'dark' : 'light';
+    setTheme(next);
+  };
+
+  let icon: IconSvgElement;
+  switch (theme) {
+    case 'system':
+      icon = Settings03Icon;
+      break;
+    case 'dark':
+      icon = Moon02Icon;
+      break;
+    case 'light':
+      icon = Sun03Icon;
+      break;
+  }
+
+  return (
+    <Button onClick={onClick} variant="outline" size="icon-sm">
+      <HugeiconsIcon
+        icon={icon}
+        size={24}
+        color="currentColor"
+        strokeWidth={1.5}
+      />
+    </Button>
   );
 }
