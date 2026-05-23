@@ -24,6 +24,12 @@ export default defineConfig({
               useMutation: true,
             },
           },
+          get_free_response: {
+            query: {
+              useQuery: false,
+              useMutation: true,
+            },
+          },
         },
       },
     },

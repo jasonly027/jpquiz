@@ -7,7 +7,7 @@ export function SideBar() {
         StudyWard
       </div>
 
-      <nav className="flex flex-col gap-2 rounded-lg bg-background p-3 [&_[data-status=active]]:font-semibold [&_[data-status=active]]:text-primary [&_a]:hover:underline">
+      <nav className="flex flex-col gap-1.5 rounded-lg bg-background p-3 **:data-[status=active]:font-semibold **:data-[status=active]:text-primary [&_a]:hover:underline">
         <Link to="/">Home</Link>
 
         <Link to="/about">About</Link>
@@ -15,8 +15,9 @@ export function SideBar() {
         <div>
           <div className="font-semibold">Modes</div>
 
-          <div className="ml-3 flex flex-col gap-2">
+          <div className="ml-3 flex flex-col">
             <Link to="/game/multiple-choice">Multiple Choice</Link>
+            <Link to="/game/free-response">Free Response</Link>
           </div>
         </div>
       </nav>

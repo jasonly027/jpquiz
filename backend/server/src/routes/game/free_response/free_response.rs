@@ -15,7 +15,7 @@ use crate::{
     application::AppState,
     routes::{
         dto::{NLevelDto, PartOfSpeechCategoryDto},
-        game::{model::GameMode, multi_choice::model::GAME_QUESTION_CHOICES},
+        game::model::GameMode,
     },
 };
 
@@ -24,7 +24,7 @@ use crate::{
 struct Api;
 
 pub fn router() -> OpenApiRouter<AppState> {
-    OpenApiRouter::with_openapi(Api::openapi()).routes(routes!(get_multi_choice))
+    OpenApiRouter::with_openapi(Api::openapi()).routes(routes!(get_free_response))
 }
 
 #[derive(Debug, Deserialize, IntoParams)]
@@ -42,7 +42,7 @@ struct GetGameResponse {
 
 #[derive(Debug, Error, ToResponseError)]
 enum GetGameError {
-    #[error("not enough pairs to create questions with provided filter(s)")]
+    #[error("no pairs to create questions with provided filter(s)")]
     #[response(status = UNPROCESSABLE_ENTITY, log = false)]
     BadQueryCombination,
 
@@ -61,8 +61,8 @@ enum GetGameError {
         (status = INTERNAL_SERVER_ERROR, body = str),
     )
 )]
-#[tracing::instrument(name = "Create multiple choice game", skip(ctx))]
-async fn get_multi_choice(
+#[tracing::instrument(name = "Create free response game", skip(ctx))]
+async fn get_free_response(
     State(ctx): State<AppState>,
     Query(query): Query<GetGameQuery>,
 ) -> Result<Json<GetGameResponse>, GetGameError> {
@@ -94,8 +94,11 @@ async fn get_multi_choice(
         })
         .sample(&mut rand::rng(), 100);
 
+    if pairs.is_empty() {
+        return Err(GetGameError::BadQueryCombination);
+    }
+
     let mut questions = create_questions(&pairs, query.mode).map_err(|e| match e {
-        CreateQuestionsError::InsufficientPairs => GetGameError::BadQueryCombination,
         CreateQuestionsError::QuestionConstruction(e) => GetGameError::QuestionConstruction(e),
     })?;
 
@@ -106,8 +109,6 @@ async fn get_multi_choice(
 
 #[derive(Debug, Clone, Error)]
 enum CreateQuestionsError {
-    #[error("not enough pairs to create questions. requires at least {GAME_QUESTION_CHOICES}")]
-    InsufficientPairs,
     #[error(transparent)]
     QuestionConstruction(#[from] CreateQuestionError),
 }
@@ -116,41 +117,15 @@ fn create_questions(
     pairs: &[WordPair],
     mode: GameMode,
 ) -> Result<Vec<GameQuestion>, CreateQuestionsError> {
-    if pairs.len() < GAME_QUESTION_CHOICES {
-        return Err(CreateQuestionsError::InsufficientPairs);
-    }
-
-    let rng = &mut rand::rng();
-
     pairs
         .iter()
         .map(|pair| {
             let prompt = extract_prompt(mode, pair)?;
-            let answer = extract_answer(mode, pair)?;
-
-            let other_pairs = pairs
-                .iter()
-                .filter(|p| **p != *pair)
-                .sample(rng, GAME_QUESTION_CHOICES - 1);
-
-            let mut choices = other_pairs
-                .iter()
-                .map(|p| extract_answer(mode, *p))
-                .collect::<Result<Vec<_>, _>>()?;
-            choices.push(answer.clone());
-            choices.shuffle(rng);
-
-            let answer_idx = choices
-                .iter()
-                .position(|c| answer == *c)
-                .expect("answer should be in choices");
+            let answers = extract_answers(mode, pair)?;
 
             Ok(GameQuestion {
                 prompt,
-                choices: choices
-                    .try_into()
-                    .expect("choices should be correctly lengthed"),
-                answer_idx,
+                answers,
                 word_pair: pair.clone().into(),
             })
         })
@@ -187,22 +162,23 @@ fn extract_prompt(mode: GameMode, pair: &WordPair) -> Result<String, CreateQuest
     }
 }
 
-fn extract_answer(mode: GameMode, pair: &WordPair) -> Result<String, CreateQuestionError> {
+fn extract_answers(mode: GameMode, pair: &WordPair) -> Result<Vec<String>, CreateQuestionError> {
     use CreateQuestionError as Cr;
     use GameMode as GM;
 
     match mode {
-        GM::EngToKana | GM::KanjiToKana => Ok(pair.kana.clone()),
-        GM::EngToKanji | GM::KanaToKanji => pair
-            .kanji
-            .clone()
-            .ok_or_else(|| Cr::MissingKanji(pair.clone())),
+        GM::EngToKana | GM::KanjiToKana => Ok(vec![pair.kana.clone()]),
+        GM::EngToKanji | GM::KanaToKanji => Ok(vec![
+            pair.kanji
+                .clone()
+                .ok_or_else(|| Cr::MissingKanji(pair.clone()))?,
+        ]),
         GM::KanaToEng | GM::KanjiToEng => {
             let gloss = extract_glossary(pair)?;
             if gloss.is_empty() {
                 return Err(Cr::MissingGlossary(pair.clone()));
             }
-            Ok(gloss[0].clone())
+            Ok(gloss)
         }
     }
 }

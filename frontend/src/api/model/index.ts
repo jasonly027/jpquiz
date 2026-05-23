@@ -5,7 +5,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './freeResponseQuestion';
 export * from './gameMode';
+export * from './getFreeResponse200';
+export * from './getFreeResponseParams';
 export * from './getMultiChoice200';
 export * from './getMultiChoiceParams';
 export * from './multiChoiceQuestion';

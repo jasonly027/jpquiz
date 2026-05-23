@@ -9,7 +9,8 @@
     "build": "vite build",
     "api": "orval",
     "format": "prettier . --write",
-    "lint": "eslint . "
+    "lint": "eslint . ",
+    "check": "tsc --noEmit"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",

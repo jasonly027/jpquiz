@@ -9,7 +9,89 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/game/multi_choice": {
+    "/game/free-response": {
+      "get": {
+        "operationId": "get_free_response",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GameMode"
+            }
+          },
+          {
+            "name": "levels",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/NLevelDto"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "pos",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/PartOfSpeechCategoryDto"
+              },
+              "uniqueItems": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FreeResponseQuestion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/multi-choice": {
       "get": {
         "operationId": "get_multi_choice",
         "parameters": [
@@ -111,6 +193,28 @@
   },
   "components": {
     "schemas": {
+      "FreeResponseQuestion": {
+        "type": "object",
+        "required": [
+          "prompt",
+          "answers",
+          "word_pair"
+        ],
+        "properties": {
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "word_pair": {
+            "$ref": "#/components/schemas/WordDto"
+          }
+        }
+      },
       "GameMode": {
         "type": "string",
         "enum": [

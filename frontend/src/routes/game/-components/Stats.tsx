@@ -2,6 +2,8 @@ import type { QuestionStat } from '../-lib/models';
 import { formatAccuracy, formatTime } from '../-lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import type { WordPair } from '@/lib/models';
 import { cn } from '@/lib/utils';
 import { BookOpenIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -57,6 +59,27 @@ function StatsRoot({ stats, children }: StatsProps) {
   );
 }
 export { StatsRoot as Stats };
+
+function calculateQuizStats<T>(stats: QuestionStat<T>[]) {
+  const guesses = stats
+    .map(({ guesses }) => guesses)
+    .filter((g) => isFinite(g));
+  const guessAvg =
+    guesses.length > 0
+      ? (guesses.reduce((sum, g) => g + sum, 0) / guesses.length).toFixed(2)
+      : 'N/A';
+
+  const accs = stats.map(({ guesses }) => 1 / guesses);
+  const accAvg = formatAccuracy(
+    accs.reduce((sum, a) => a + sum, 0) / accs.length
+  );
+
+  const totalTime = formatTime(
+    stats.map(({ elapsed }) => elapsed).reduce((sum, t) => t + sum, 0)
+  );
+
+  return { guessAvg, accAvg, totalTime };
+}
 
 export interface StatsContentProps {
   children?: React.ReactNode;
@@ -129,7 +152,7 @@ export function StatsRowGenericStats({ stats }: StatsRowGenericStatsProps) {
     <div className="flex flex-row divide-card-foreground/10 *:flex *:flex-1 *:items-center *:justify-center *:px-4 *:py-1.5 *:text-nowrap max-sm:divide-x-2 sm:flex-col sm:divide-y-2">
       <div
         data-skipped={isFinite(stats.guesses)}
-        className="min-w-20 data-skipped:italic"
+        className="min-w-26 data-skipped:italic"
       >
         {isFinite(stats.guesses) ? `${stats.guesses} Guesses` : 'Skipped'}
       </div>
@@ -180,23 +203,46 @@ export function StatsRowJishoButton({
   );
 }
 
-function calculateQuizStats<T>(stats: QuestionStat<T>[]) {
-  const guesses = stats
-    .map(({ guesses }) => guesses)
-    .filter((g) => isFinite(g));
-  const guessAvg =
-    guesses.length > 0
-      ? (guesses.reduce((sum, g) => g + sum, 0) / guesses.length).toFixed(2)
-      : 'N/A';
+interface StatsRowDetailsProps {
+  wordPair: WordPair;
+}
 
-  const accs = stats.map(({ guesses }) => 1 / guesses);
-  const accAvg = formatAccuracy(
-    accs.reduce((sum, a) => a + sum, 0) / accs.length
+export function StatsRowDetails({ wordPair }: StatsRowDetailsProps) {
+  return (
+    <Card className="p-3">
+      <CardContent className="flex flex-col items-start gap-6 py-3 sm:flex-row">
+        <div className="flex shrink-0 flex-col gap-1.5">
+          <span className="font-jp">{wordPair.kana}</span>
+          {wordPair.kanji && (
+            <span className="font-jp text-base">{wordPair.kanji}</span>
+          )}
+          <span className="mt-1 rounded-sm bg-primary/15 px-1.5">
+            JLPT {wordPair.level}
+          </span>
+        </div>
+
+        <Separator
+          orientation="horizontal"
+          className="bg-card-foreground/10 sm:hidden"
+        />
+        <Separator
+          orientation="vertical"
+          className="hidden bg-card-foreground/10 sm:block"
+        />
+
+        <div className="flex flex-col gap-3">
+          {wordPair.senses.map((sense, idx) => (
+            <div key={idx}>
+              <div className="text-muted-foreground">
+                {sense.partsOfSpeech.join(', ')}
+              </div>
+              <div>
+                {idx + 1}. {sense.glossary.join('; ')}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
-
-  const totalTime = formatTime(
-    stats.map(({ elapsed }) => elapsed).reduce((sum, t) => t + sum, 0)
-  );
-
-  return { guessAvg, accAvg, totalTime };
 }

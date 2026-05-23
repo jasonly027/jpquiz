@@ -4,7 +4,12 @@
  * jpquiz
  * OpenAPI spec version: 0.1.0
  */
-import type { GetMultiChoice200, GetMultiChoiceParams } from './model';
+import type {
+  GetFreeResponse200,
+  GetFreeResponseParams,
+  GetMultiChoice200,
+  GetMultiChoiceParams,
+} from './model';
 import { customInstance } from './mutator/custom-axios';
 import type { ErrorType } from './mutator/custom-axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -29,18 +34,91 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
+export const getFreeResponse = (
+  params: GetFreeResponseParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal
+) => {
+  return customInstance<GetFreeResponse200>(
+    { url: `/game/free-response`, method: 'GET', params, signal },
+    options
+  );
+};
+
+export const getGetFreeResponseMutationOptions = <
+  TError = ErrorType<string>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof getFreeResponse>>,
+    TError,
+    { params: GetFreeResponseParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof getFreeResponse>>,
+  TError,
+  { params: GetFreeResponseParams },
+  TContext
+> => {
+  const mutationKey = ['getFreeResponse'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      'mutationKey' in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof getFreeResponse>>,
+    { params: GetFreeResponseParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return getFreeResponse(params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GetFreeResponseMutationResult = NonNullable<
+  Awaited<ReturnType<typeof getFreeResponse>>
+>;
+
+export type GetFreeResponseMutationError = ErrorType<string>;
+
+export const useGetFreeResponse = <
+  TError = ErrorType<string>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof getFreeResponse>>,
+      TError,
+      { params: GetFreeResponseParams },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof getFreeResponse>>,
+  TError,
+  { params: GetFreeResponseParams },
+  TContext
+> => {
+  return useMutation(getGetFreeResponseMutationOptions(options), queryClient);
+};
+
 export const getMultiChoice = (
   params: GetMultiChoiceParams,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal
 ) => {
   return customInstance<GetMultiChoice200>(
-    {
-      url: `${import.meta.env['VITE_APP_BACKEND_URL']}/game/multi_choice`,
-      method: 'GET',
-      params,
-      signal,
-    },
+    { url: `/game/multi-choice`, method: 'GET', params, signal },
     options
   );
 };
@@ -117,17 +195,13 @@ export const healthCheck = (
   signal?: AbortSignal
 ) => {
   return customInstance<string>(
-    {
-      url: `${import.meta.env['VITE_APP_BACKEND_URL']}/health_check`,
-      method: 'GET',
-      signal,
-    },
+    { url: `/health_check`, method: 'GET', signal },
     options
   );
 };
 
 export const getHealthCheckQueryKey = () => {
-  return [`${import.meta.env['VITE_APP_BACKEND_URL']}/health_check`] as const;
+  return [`/health_check`] as const;
 };
 
 export const getHealthCheckQueryOptions = <

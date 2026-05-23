@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GameMultipleChoiceIndexRouteImport } from './routes/game/multiple-choice/index'
+import { Route as GameFreeResponseIndexRouteImport } from './routes/game/free-response/index'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
@@ -28,34 +29,48 @@ const GameMultipleChoiceIndexRoute = GameMultipleChoiceIndexRouteImport.update({
   path: '/game/multiple-choice/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameFreeResponseIndexRoute = GameFreeResponseIndexRouteImport.update({
+  id: '/game/free-response/',
+  path: '/game/free-response/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/game/free-response/': typeof GameFreeResponseIndexRoute
   '/game/multiple-choice/': typeof GameMultipleChoiceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/game/free-response': typeof GameFreeResponseIndexRoute
   '/game/multiple-choice': typeof GameMultipleChoiceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/game/free-response/': typeof GameFreeResponseIndexRoute
   '/game/multiple-choice/': typeof GameMultipleChoiceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/game/multiple-choice/'
+  fullPaths: '/' | '/about' | '/game/free-response/' | '/game/multiple-choice/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/game/multiple-choice'
-  id: '__root__' | '/' | '/about' | '/game/multiple-choice/'
+  to: '/' | '/about' | '/game/free-response' | '/game/multiple-choice'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/game/free-response/'
+    | '/game/multiple-choice/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  GameFreeResponseIndexRoute: typeof GameFreeResponseIndexRoute
   GameMultipleChoiceIndexRoute: typeof GameMultipleChoiceIndexRoute
 }
 
@@ -82,12 +97,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameMultipleChoiceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game/free-response/': {
+      id: '/game/free-response/'
+      path: '/game/free-response'
+      fullPath: '/game/free-response/'
+      preLoaderRoute: typeof GameFreeResponseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  GameFreeResponseIndexRoute: GameFreeResponseIndexRoute,
   GameMultipleChoiceIndexRoute: GameMultipleChoiceIndexRoute,
 }
 export const routeTree = rootRouteImport

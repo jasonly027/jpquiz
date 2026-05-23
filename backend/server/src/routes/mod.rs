@@ -14,5 +14,6 @@ struct Api;
 pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::with_openapi(Api::openapi())
         .routes(routes!(health_check::health_check))
-        .nest("/game/multi_choice", game::multi_choice::router())
+        .nest("/game/multi-choice", game::multi_choice::router())
+        .nest("/game/free-response", game::free_response::router())
 }

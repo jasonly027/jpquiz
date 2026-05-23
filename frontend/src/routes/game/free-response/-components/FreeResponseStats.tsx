@@ -13,7 +13,7 @@ import {
 import type { QuizMeta, QuizPostState } from '../../-hooks/useQuiz';
 import type { QuestionStat } from '../../-lib/models';
 import { getGameChoicesFont, getGamePromptFont } from '../../-lib/utils';
-import { useGetMultiChoice } from '@/api/server';
+import { useGetFreeResponse } from '@/api/server';
 import { Button } from '@/components/ui/button';
 import {
   Collapsible,
@@ -21,7 +21,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Spinner } from '@/components/ui/spinner';
-import type { MultiChoiceQuestion } from '@/lib/models';
+import type { FreeResponseQuestion } from '@/lib/models';
 import {
   ArrowDataTransferVerticalIcon,
   ArrowDownIcon,
@@ -30,15 +30,15 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { isAxiosError } from 'axios';
 import { useState } from 'react';
 
-export type MutliChoiceStatsProps = QuizPostState<MultiChoiceQuestion>;
+export type MutliChoiceStatsProps = QuizPostState<FreeResponseQuestion>;
 
-export function MultiChoiceStats({
+export function FreeResponseStats({
   stats,
   meta,
   initQuiz,
   reset,
 }: MutliChoiceStatsProps) {
-  const getGame = useGetMultiChoice({
+  const getGame = useGetFreeResponse({
     mutation: {
       onSuccess(
         { data: questions },
@@ -104,7 +104,7 @@ export function MultiChoiceStats({
 
         <StatsRowContainer>
           {stats.map((stats, idx) => (
-            <MultiChoiceStatsRow
+            <FreeResponseStatsRow
               key={idx}
               idx={idx}
               stats={stats}
@@ -117,13 +117,13 @@ export function MultiChoiceStats({
   );
 }
 
-export interface MultiChoiceStatsRowProps {
+export interface FreeResponseRowProps {
   idx: number;
-  stats: QuestionStat<MultiChoiceQuestion>;
-  meta: QuizMeta<MultiChoiceQuestion>;
+  stats: QuestionStat<FreeResponseQuestion>;
+  meta: QuizMeta<FreeResponseQuestion>;
 }
 
-function MultiChoiceStatsRow({ idx, stats, meta }: MultiChoiceStatsRowProps) {
+function FreeResponseStatsRow({ idx, stats, meta }: FreeResponseRowProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -169,8 +169,8 @@ function MultiChoiceStatsRow({ idx, stats, meta }: MultiChoiceStatsRowProps) {
 }
 
 interface StatsRowSolutionProps {
-  stats: QuestionStat<MultiChoiceQuestion>;
-  meta: QuizMeta<MultiChoiceQuestion>;
+  stats: QuestionStat<FreeResponseQuestion>;
+  meta: QuizMeta<FreeResponseQuestion>;
 }
 
 function StatsRowSolution({ stats, meta }: StatsRowSolutionProps) {
@@ -188,7 +188,7 @@ function StatsRowSolution({ stats, meta }: StatsRowSolutionProps) {
         />
       </div>
       <div className={`${getGameChoicesFont(meta.mode)} px-3`}>
-        {stats.source.choices[stats.source.answer_idx]}
+        {stats.source.answers.join('; ')}
       </div>
     </div>
   );

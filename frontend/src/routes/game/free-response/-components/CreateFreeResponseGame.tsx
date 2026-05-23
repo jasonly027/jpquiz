@@ -5,28 +5,28 @@ import {
   FieldSubmit,
 } from '../../-components/WordPairForm';
 import type { QuizPreState } from '../../-hooks/useQuiz';
-import { useGetMultiChoice } from '@/api/server';
+import { useGetFreeResponse } from '@/api/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { FieldGroup, FieldLegend, FieldSet } from '@/components/ui/field';
 import type {
+  FreeResponseQuestion,
   GameMode,
-  MultiChoiceQuestion,
   NLevel,
   PartOfSpeechCategory,
 } from '@/lib/models';
 import { isAxiosError } from 'axios';
 import { useState, type SubmitEventHandler } from 'react';
 
-export type CreateMultiChoiceGameProps = QuizPreState<MultiChoiceQuestion>;
+export type CreateMultiChoiceGameProps = QuizPreState<FreeResponseQuestion>;
 
-export function CreateMultiChoiceGame({
+export function CreateFreeResponseGame({
   initQuiz,
 }: CreateMultiChoiceGameProps) {
   const [mode, setMode] = useState<GameMode>();
   const [levels, setLevels] = useState<NLevel[]>();
   const [categories, setCategories] = useState<PartOfSpeechCategory[]>();
 
-  const getGame = useGetMultiChoice({
+  const getGame = useGetFreeResponse({
     mutation: {
       onSuccess(
         { data: questions },
@@ -48,8 +48,7 @@ export function CreateMultiChoiceGame({
   let getGameError: string | undefined;
   if (getGame.error) {
     if (isAxiosError(getGame.error) && getGame.error.status === 422) {
-      getGameError =
-        'Word pool is too small to create a game. Please try different settings.';
+      getGameError = 'Word pool is empty. Please try different settings.';
     } else {
       getGameError = 'Something went wrong. Please try again.';
     }

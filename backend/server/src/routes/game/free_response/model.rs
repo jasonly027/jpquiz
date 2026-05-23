@@ -4,12 +4,9 @@ use utoipa::ToSchema;
 use crate::routes::dto::WordDto;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, ToSchema)]
-#[schema(as = MultiChoiceQuestion)]
+#[schema(as = FreeResponseQuestion)]
 pub struct GameQuestion {
     pub prompt: String,
-    pub choices: [String; GAME_QUESTION_CHOICES],
-    pub answer_idx: usize,
+    pub answers: Vec<String>,
     pub word_pair: WordDto,
 }
-
-pub const GAME_QUESTION_CHOICES: usize = 4;

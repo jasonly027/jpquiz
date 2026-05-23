@@ -8,26 +8,29 @@ import {
 } from '../../-components/WordPairGame';
 import type { QuizInState } from '../../-hooks/useQuiz';
 import { useTimer } from '../../-hooks/useTimer';
-import { getGamePromptFont, getGameChoicesFont } from '../../-lib/utils';
-import { Button } from '@/components/ui/button';
-import type { MultiChoiceQuestion } from '@/lib/models';
-import { cn } from '@/lib/utils';
-import { useState, type ComponentProps } from 'react';
+import { getGamePromptFont } from '../../-lib/utils';
+import { Input } from '@/components/ui/input';
+import type { FreeResponseQuestion } from '@/lib/models';
+import { useRef, useState } from 'react';
 
-export type MultiChoiceGameProps = QuizInState<MultiChoiceQuestion>;
+export type FreeResponseGameProps = QuizInState<FreeResponseQuestion>;
 
-export function MultiChoiceGame({
+export function FreeResponseGame({
   question,
   currentIndex,
   meta,
   submitAnswer,
   endQuiz,
-}: MultiChoiceGameProps) {
+}: FreeResponseGameProps) {
   const [guesses, setGuesses] = useState(0);
   const elapsedSecs = useTimer();
 
-  const onGuess = (idx: number) => {
-    const isCorrect = idx === question.answer_idx;
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const onGuess = () => {
+    if (!inputRef.current?.value) return;
+
+    const isCorrect = question.answers.includes(inputRef.current.value);
     if (isCorrect) {
       submitAnswer({
         guesses: guesses + 1,
@@ -38,6 +41,7 @@ export function MultiChoiceGame({
     }
 
     setGuesses((prev) => prev + 1);
+    inputRef.current.value = '';
   };
 
   const onSkip = () => {
@@ -73,43 +77,26 @@ export function MultiChoiceGame({
 
           <div className="flex-1"></div>
 
-          <SkipButton onClick={onSkip} />
+          <SkipButton onClick={onSkip} className="pr-0!" />
         </WordPairCardActions>
       </WordPairCard>
 
-      <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {question.choices.map((choice, idx) => (
-          <OnceButton
-            key={idx}
-            onClick={() => onGuess(idx)}
-            className={getGameChoicesFont(meta.mode)}
-          >
-            {choice}
-          </OnceButton>
-        ))}
+      <div className="mt-1.5">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onGuess();
+          }}
+        >
+          <Input
+            ref={inputRef}
+            autoFocus
+            type="text"
+            placeholder="Input your answer"
+            className="h-[2lh] text-center text-sm sm:text-xl md:text-xl"
+          />
+        </form>
       </div>
     </div>
-  );
-}
-
-type OnceButtonProps = {} & ComponentProps<'button'>;
-
-function OnceButton({ onClick, className, ...props }: OnceButtonProps) {
-  const [disabled, setDisabled] = useState(false);
-
-  return (
-    <Button
-      onClick={(e) => {
-        setDisabled(true);
-        return onClick?.(e);
-      }}
-      disabled={disabled}
-      size="lg"
-      className={cn(
-        'line-clamp-4 h-[4.5lh] text-lg whitespace-normal',
-        className
-      )}
-      {...props}
-    />
   );
 }
