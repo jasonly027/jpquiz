@@ -60,12 +60,7 @@ function ThemeToggleButton() {
 
   return (
     <Button onClick={onClick} variant="outline" size="icon-sm">
-      <HugeiconsIcon
-        icon={icon}
-        size={24}
-        color="currentColor"
-        strokeWidth={1.5}
-      />
+      <HugeiconsIcon icon={icon} color="currentColor" strokeWidth={1.5} />
     </Button>
   );
 }

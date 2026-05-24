@@ -1,18 +1,11 @@
 import type { QuestionStat } from '../-lib/models';
 import type { GameMode, NLevel, PartOfSpeechCategory } from '@/lib/models';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export type UseQuizValue<T> =
   | QuizPreState<T>
   | QuizInState<T>
   | QuizPostState<T>;
-
-export interface QuizMeta<T> {
-  questions: T[];
-  mode: GameMode;
-  levels: NLevel[];
-  categories: PartOfSpeechCategory[];
-}
 
 export interface QuizPreState<T> {
   state: 'pre';
@@ -36,6 +29,13 @@ export interface QuizPostState<T> {
   reset: () => void;
 }
 
+export interface QuizMeta<T> {
+  questions: T[];
+  mode: GameMode;
+  levels: NLevel[];
+  categories: PartOfSpeechCategory[];
+}
+
 export function useQuiz<T>(): UseQuizValue<T> {
   const [meta, setMeta] = useState<QuizMeta<T>>();
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -45,30 +45,29 @@ export function useQuiz<T>(): UseQuizValue<T> {
   const isComplete =
     meta !== undefined && currentIndex >= meta.questions.length;
 
-  const initQuiz = useCallback((meta: QuizMeta<T>) => {
+  const initQuiz = (meta: QuizMeta<T>) => {
     setMeta(meta);
     setCurrentIndex(0);
     setStats([]);
-  }, []);
+  };
 
-  const submitAnswer = useCallback(
-    (stat: Parameters<QuizInState<T>['submitAnswer']>[0]) => {
-      if (isComplete) return;
-      setStats((prev) => [...prev, stat]);
-      setCurrentIndex((prev) => prev + 1);
-    },
-    [isComplete]
-  );
+  const submitAnswer = (
+    stat: Parameters<QuizInState<T>['submitAnswer']>[0]
+  ) => {
+    if (isComplete) return;
+    setStats((prev) => [...prev, stat]);
+    setCurrentIndex((prev) => prev + 1);
+  };
 
-  const endQuiz = useCallback(() => {
+  const endQuiz = () => {
     if (!meta) return;
     setCurrentIndex(meta.questions.length);
-  }, [meta]);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setMeta(undefined);
     setCurrentIndex(0);
-  }, []);
+  };
 
   if (meta === undefined) {
     return {

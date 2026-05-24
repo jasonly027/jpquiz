@@ -194,7 +194,6 @@ export function StatsRowJishoButton({
       <a href={href} target="_blank" rel="noreferrer">
         <HugeiconsIcon
           icon={BookOpenIcon}
-          size={24}
           color="currentColor"
           strokeWidth={1.5}
         />

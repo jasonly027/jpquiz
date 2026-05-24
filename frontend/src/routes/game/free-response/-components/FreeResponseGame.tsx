@@ -1,3 +1,4 @@
+import { HintBox, HintToggleButton } from '../../-components/Hint';
 import {
   RetireButton,
   SkipButton,
@@ -6,9 +7,11 @@ import {
   WordPairCardActions,
   WordPairStatBar,
 } from '../../-components/WordPairGame';
+import { useHint } from '../../-hooks/useHint';
 import type { QuizInState } from '../../-hooks/useQuiz';
+import { useShowHint } from '../../-hooks/useShowHint';
 import { useTimer } from '../../-hooks/useTimer';
-import { getGamePromptFont } from '../../-lib/utils';
+import { getGameChoicesFont, getGamePromptFont } from '../../-lib/utils';
 import { Input } from '@/components/ui/input';
 import type { FreeResponseQuestion } from '@/lib/models';
 import { useRef, useState } from 'react';
@@ -24,6 +27,11 @@ export function FreeResponseGame({
 }: FreeResponseGameProps) {
   const [guesses, setGuesses] = useState(0);
   const elapsedSecs = useTimer();
+
+  const { hint, revealOne } = useHint(question.answers[0]!, {
+    minRemaining: 1,
+  });
+  const [showHint] = useShowHint();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +49,7 @@ export function FreeResponseGame({
     }
 
     setGuesses((prev) => prev + 1);
+    revealOne();
     inputRef.current.value = '';
   };
 
@@ -58,25 +67,27 @@ export function FreeResponseGame({
 
       <WordPairCard>
         <WordPairCardActions>
+          <HintToggleButton className="pl-0!" />
           <div className="flex-1"></div>
           <RetireButton onClick={endQuiz} className="pr-0!" />
         </WordPairCardActions>
 
         <WordPairCardContent>
-          <span
-            className={`${getGamePromptFont(meta.mode)} m-2 line-clamp-4 max-w-[30ch] text-center select-none sm:text-xl`}
-          >
-            {question.prompt}
-          </span>
+          <div className="flex flex-col items-center gap-4">
+            <div
+              className={`${getGamePromptFont(meta.mode)} m-2 line-clamp-4 max-w-[30ch] text-center select-none sm:text-xl`}
+            >
+              {question.prompt}
+            </div>
+            {showHint && <HintBox hint={hint} mode={meta.mode} />}
+          </div>
         </WordPairCardContent>
 
         <WordPairCardActions>
           <span className="flex items-center text-muted-foreground">
             Question {currentIndex + 1} of {meta.questions.length}
           </span>
-
           <div className="flex-1"></div>
-
           <SkipButton onClick={onSkip} className="pr-0!" />
         </WordPairCardActions>
       </WordPairCard>
@@ -93,7 +104,7 @@ export function FreeResponseGame({
             autoFocus
             type="text"
             placeholder="Input your answer"
-            className="h-[2lh] text-center text-sm sm:text-xl md:text-xl"
+            className={`${getGameChoicesFont(meta.mode)} h-[2lh] text-center text-sm sm:text-xl md:text-xl`}
           />
         </form>
       </div>

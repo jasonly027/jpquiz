@@ -1,6 +1,6 @@
 import { formatAccuracy, formatTime } from '../-lib/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogClose,
@@ -65,10 +65,9 @@ export function WordPairCardContent({
 
 export type SkipButtonProps = ComponentProps<'button'>;
 
-export function SkipButton({ onClick, className, ...props }: SkipButtonProps) {
+export function SkipButton({ className, ...props }: SkipButtonProps) {
   return (
     <Button
-      onClick={onClick}
       variant="ghost"
       className={cn('font-semibold text-muted-foreground', className)}
       {...props}
@@ -76,7 +75,6 @@ export function SkipButton({ onClick, className, ...props }: SkipButtonProps) {
       Skip
       <HugeiconsIcon
         icon={ArrowRightDoubleIcon}
-        size={24}
         color="currentColor"
         strokeWidth={1.5}
         data-icon="inline-end"
@@ -104,7 +102,6 @@ export function RetireButton({
           <HugeiconsIcon
             icon={StopWatchIcon}
             size={24}
-            color="currentColor"
             strokeWidth={1.5}
             data-icon="inline-end"
           />
