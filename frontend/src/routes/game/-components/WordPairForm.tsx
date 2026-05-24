@@ -24,7 +24,7 @@ import { Spinner } from '@/components/ui/spinner';
 import type { GameMode, NLevel, PartOfSpeechCategory } from '@/lib/models';
 import { cn } from '@/lib/utils';
 import type { ComponentProps, Dispatch, SetStateAction } from 'react';
-import React from 'react';
+import React, { useId } from 'react';
 
 const GAME_MODES: { name: string; value: GameMode }[] = [
   {
@@ -58,9 +58,11 @@ export function FieldGameMode({
 }: {
   setMode: Dispatch<SetStateAction<GameMode | undefined>>;
 }) {
+  const id = useId();
+
   return (
     <Field orientation="responsive">
-      <FieldLabel htmlFor="gameModeSelect" className="flex-1 text-nowrap">
+      <FieldLabel htmlFor={id} className="flex-1 text-nowrap">
         Game Mode
       </FieldLabel>
 
@@ -70,7 +72,7 @@ export function FieldGameMode({
           onValueChange={(v) => setMode(v as GameMode)}
           required
         >
-          <SelectTrigger id="gameModeSelect">
+          <SelectTrigger id={id}>
             <SelectValue placeholder="Select Game Mode" />
           </SelectTrigger>
           <SelectContent>
@@ -95,17 +97,18 @@ export function FieldNLevel({
 }: {
   setLevels: Dispatch<SetStateAction<NLevel[] | undefined>>;
 }) {
+  const id = useId();
   const levelsAnchor = useComboboxAnchor();
 
   return (
     <Field orientation="responsive">
-      <FieldLabel htmlFor="nLevelCombo" className="text-nowrap">
+      <FieldLabel htmlFor={id} className="text-nowrap">
         JLPT NLevel
       </FieldLabel>
 
       <div className="max-w-58 flex-1/4">
         <Combobox
-          id="nLevelCombo"
+          id={id}
           items={N_LEVELS}
           onValueChange={setLevels}
           multiple
@@ -161,17 +164,18 @@ export function FieldCategory({
 }: {
   setCategories: Dispatch<SetStateAction<PartOfSpeechCategory[] | undefined>>;
 }) {
+  const id = useId();
   const anchor = useComboboxAnchor();
 
   return (
     <Field orientation="responsive">
-      <FieldLabel htmlFor="categoryCombo" className="text-nowrap">
+      <FieldLabel htmlFor={id} className="text-nowrap">
         Categories
       </FieldLabel>
 
       <div className="max-w-58 flex-1/4">
         <Combobox
-          id="categoryCombo"
+          id={id}
           items={CATEGORIES}
           onValueChange={(c: typeof CATEGORIES) =>
             setCategories(c.map(({ value }) => value))
