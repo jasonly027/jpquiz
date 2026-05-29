@@ -5,6 +5,7 @@ import { MultiChoiceGame } from './-components/MultiChoiceGame';
 import { MultiChoiceStats } from './-components/MultiChoiceStats';
 import type { MultiChoiceQuestion } from '@/lib/models';
 import { createFileRoute } from '@tanstack/react-router';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/game/multiple-choice/')({
   component: RouteComponent,
@@ -14,40 +15,40 @@ function RouteComponent() {
   const quizState = useQuiz<MultiChoiceQuestion>();
 
   // TODO: Remove me
-  // useEffect(() => {
-  //   if (quizState.state !== 'pre') return;
-  //
-  //   const q1: MultiChoiceQuestion = {
-  //     prompt:
-  //       'This is a very very long prompt that takes many words and spans a long line of text',
-  //     choices: [
-  //       'Choice A',
-  //       'This is a very very long choice that takes many characters',
-  //       'Choice C',
-  //       'Choice D',
-  //     ],
-  //     answer_idx: 1,
-  //     word_pair: {
-  //       id: 'id',
-  //       kana: 'はんのう',
-  //       kanji: '反応',
-  //       level: 'N1',
-  //       senses: [
-  //         {
-  //           glossary: ['gloss1', 'gloss2'],
-  //           partsOfSpeech: ['noun'],
-  //         },
-  //       ],
-  //     },
-  //   };
-  //
-  //   quizState.initQuiz?.({
-  //     questions: [q1],
-  //     mode: 'kanatoeng',
-  //     levels: ['N1'],
-  //     categories: ['nouns', 'verbs'],
-  //   });
-  // }, []);
+  useEffect(() => {
+    if (quizState.state !== 'pre') return;
+
+    const q1: MultiChoiceQuestion = {
+      prompt:
+        'This is a very very long prompt that takes many words and spans a long line of text',
+      choices: [
+        'Choice A',
+        'This is a very very long choice that takes many characters',
+        'Choice C',
+        'Choice D',
+      ],
+      answer_idx: 1,
+      word_pair: {
+        id: 'id',
+        kana: 'はんのう',
+        kanji: '反応',
+        level: 'N1',
+        senses: [
+          {
+            glossary: ['gloss1', 'gloss2'],
+            partsOfSpeech: ['noun'],
+          },
+        ],
+      },
+    };
+
+    quizState.initQuiz?.({
+      questions: [q1],
+      mode: 'kanatoeng',
+      levels: ['N1'],
+      categories: ['nouns', 'verbs'],
+    });
+  }, []);
 
   const content = (() => {
     switch (quizState.state) {

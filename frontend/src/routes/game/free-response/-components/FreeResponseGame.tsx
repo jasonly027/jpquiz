@@ -65,7 +65,7 @@ export function FreeResponseGame({
   };
 
   return (
-    <div className="flex w-full max-w-4xl flex-col gap-1 font-semibold">
+    <div className="flex w-full max-w-6xl flex-col gap-1 font-semibold">
       <WordPairStatBar guesses={guesses} seconds={elapsedSecs} />
 
       <WordPairCard>
@@ -78,7 +78,7 @@ export function FreeResponseGame({
         <WordPairCardContent>
           <div className="flex flex-col items-center gap-4">
             <div
-              className={`${getGamePromptFont(meta.mode)} m-2 line-clamp-4 max-w-[30ch] text-center select-none sm:text-xl`}
+              className={`${getGamePromptFont(meta.mode)} m-2 line-clamp-4 max-w-[40ch] text-center select-none sm:text-3xl`}
             >
               {question.prompt}
             </div>

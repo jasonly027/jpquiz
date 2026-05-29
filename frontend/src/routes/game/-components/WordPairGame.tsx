@@ -40,7 +40,7 @@ export function WordPairStatBar({ guesses, seconds }: WordPairStatBarProps) {
 }
 
 export function WordPairCard({ children }: { children?: React.ReactNode }) {
-  return <Card className="min-h-50 justify-center gap-1 py-2">{children}</Card>;
+  return <Card className="min-h-80 justify-center gap-1 py-2">{children}</Card>;
 }
 
 export function WordPairCardActions({
