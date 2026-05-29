@@ -148,7 +148,12 @@ fn extract_prompt(mode: GameMode, pair: &WordPair) -> Result<String, CreateQuest
 
     match mode {
         GM::EngToKana | GM::EngToKanji => {
-            let gloss = extract_glossary(pair)?;
+            let gloss = pair
+                .senses
+                .choose(&mut rand::rng())
+                .ok_or_else(|| Cr::MissingSense(pair.clone()))?
+                .glossary
+                .clone();
             if gloss.is_empty() {
                 return Err(Cr::MissingGlossary(pair.clone()));
             }
@@ -174,22 +179,15 @@ fn extract_answers(mode: GameMode, pair: &WordPair) -> Result<Vec<String>, Creat
                 .ok_or_else(|| Cr::MissingKanji(pair.clone()))?,
         ]),
         GM::KanaToEng | GM::KanjiToEng => {
-            let gloss = extract_glossary(pair)?;
+            let gloss: Vec<String> = pair
+                .senses
+                .iter()
+                .flat_map(|s| s.glossary.clone())
+                .collect();
             if gloss.is_empty() {
                 return Err(Cr::MissingGlossary(pair.clone()));
             }
             Ok(gloss)
         }
     }
-}
-
-fn extract_glossary(pair: &WordPair) -> Result<Vec<String>, CreateQuestionError> {
-    use CreateQuestionError as Cr;
-
-    let sense = pair
-        .senses
-        .choose(&mut rand::rng())
-        .ok_or_else(|| Cr::MissingSense(pair.clone()))?;
-
-    Ok(sense.glossary.clone())
 }
