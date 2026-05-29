@@ -4,7 +4,6 @@ use anyhow::Result;
 use axum::{Router, middleware};
 use dictionary::Dictionary;
 use http::{HeaderValue, Method};
-use sqlx::PgPool;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
@@ -14,7 +13,7 @@ use utoipa_axum::router::OpenApiRouter;
 
 use crate::{
     configuration::{APP_NAME, ApplicationSettings, Settings},
-    database, routes,
+    routes,
     telemetry::{self, RequestSpan},
     util,
 };
@@ -41,13 +40,13 @@ impl Application {
         let (router, _) = router(&config.application).split_for_parts();
 
         let state = {
-            let db_pool = database::create_pool(&config.database);
+            // let db_pool = database::create_pool(&config.database);
 
             let dict = include_str!("../../static/dictionary.json");
             let dictionary = Arc::new(Dictionary::load(Cursor::new(dict))?);
 
             Arc::new(AppStateInternal {
-                db_pool,
+                // db_pool,
                 dictionary,
             })
         };
@@ -101,6 +100,6 @@ pub fn router(config: &ApplicationSettings) -> OpenApiRouter<AppState> {
 pub type AppState = Arc<AppStateInternal>;
 
 pub struct AppStateInternal {
-    pub db_pool: PgPool,
+    // pub db_pool: PgPool,
     pub dictionary: Arc<Dictionary>,
 }

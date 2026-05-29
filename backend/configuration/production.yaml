@@ -1,4 +1,10 @@
 application:
   host: 0.0.0.0
+  client_origin: http://studyward.jsonis.me
 database:
+  host: localhost
+  port: 5432
   require_ssl: true
+  user: postgres
+  password: password
+  database: jpquiz

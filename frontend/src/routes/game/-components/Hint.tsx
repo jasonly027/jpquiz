@@ -23,9 +23,9 @@ export interface HintBoxProps {
 
 export function HintBox({ hint, mode }: HintBoxProps) {
   return (
-    <div className="flex w-full flex-col items-center justify-center rounded-lg bg-background px-3 py-2 ring ring-foreground/15">
+    <div className="flex w-full flex-col items-center justify-center rounded-lg bg-background px-3 pt-2 pb-4 ring ring-foreground/15">
       <div className="flex items-baseline gap-0.5">
-        <span className="text-muted-foreground">Hint</span>
+        <span className="ml-2 text-muted-foreground">Hint</span>
 
         <Popover>
           <PopoverTrigger asChild>
@@ -44,11 +44,13 @@ export function HintBox({ hint, mode }: HintBoxProps) {
         </Popover>
       </div>
 
-      <span
-        className={`${getGameChoicesFont(mode)} text-xl tracking-[0.5rem] select-none`}
+      <div
+        className={`${getGameChoicesFont(mode)} flex gap-2 text-xl select-none`}
       >
-        {hint}
-      </span>
+        {hint.split('').map((c, idx) => (
+          <span key={idx}>{c}</span>
+        ))}
+      </div>
     </div>
   );
 }
