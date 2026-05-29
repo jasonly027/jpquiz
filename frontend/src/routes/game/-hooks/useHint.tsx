@@ -49,13 +49,21 @@ function createHint(value: string, showHiragana: boolean) {
   return value
     .split('')
     .map((c) => {
-      const shouldShow = showHiragana && isHiraganaChar(c);
-      return shouldShow ? c : CENSOR_STR;
+      return shouldShow(c, showHiragana) ? c : CENSOR_STR;
     })
     .join('');
 }
 
-function isHiraganaChar(value: string): boolean {
-  return hiraganaCharMatcher.test(value);
+function shouldShow(c: string, showHiragana: boolean) {
+  return !isAlpha(c) || (showHiragana && isHiraganaChar(c));
+}
+
+function isAlpha(c: string): boolean {
+  return alphaCharMatcher.test(c);
+}
+const alphaCharMatcher = /^[a-zA-Z]$/;
+
+function isHiraganaChar(c: string): boolean {
+  return hiraganaCharMatcher.test(c);
 }
 const hiraganaCharMatcher = /^[\u3041-\u3096]$/;

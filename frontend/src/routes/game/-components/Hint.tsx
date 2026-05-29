@@ -45,10 +45,10 @@ export function HintBox({ hint, mode }: HintBoxProps) {
       </div>
 
       <div
-        className={`${getGameChoicesFont(mode)} flex gap-2 text-xl select-none`}
+        className={`${getGameChoicesFont(mode)} flex gap-1 text-xl select-none`}
       >
         {hint.split('').map((c, idx) => (
-          <span key={idx}>{c}</span>
+          <span key={idx}>{c === ' ' ? <>&nbsp;&nbsp;</> : c}</span>
         ))}
       </div>
     </div>

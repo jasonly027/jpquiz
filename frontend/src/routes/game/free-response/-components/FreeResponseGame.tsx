@@ -28,8 +28,11 @@ export function FreeResponseGame({
   const [guesses, setGuesses] = useState(0);
   const elapsedSecs = useTimer();
 
+  const isKanjiResponse =
+    meta.mode === 'engtokanji' || meta.mode === 'kanatokanji';
   const { hint, revealOne } = useHint(question.answers[0]!, {
     minRemaining: 1,
+    showHiragana: isKanjiResponse,
   });
   const [showHint] = useShowHint();
 
