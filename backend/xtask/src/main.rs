@@ -29,7 +29,6 @@ fn try_main() -> Result<()> {
     match task.as_deref() {
         Some("db:up") => db_up()?,
         Some("db:down") => db_down()?,
-        Some("run") => run()?,
         Some("generate-dict") => generate_dict()?,
         Some("generate-api") => generate_api()?,
         _ => print_help(),
@@ -43,7 +42,6 @@ fn print_help() {
 
 db:up             Start development database
 db:down           Stop development database
-run               Run server crate
 generate-dict     Generate dictionary file
 generate-api      Generate OpenAPI specification
     "
@@ -85,10 +83,6 @@ fn run_docker(cmd: &[&str]) -> Result<()> {
     }
 
     Ok(())
-}
-
-fn run() -> Result<()> {
-    run_cargo(&["run", "-p", "server"])
 }
 
 fn run_cargo(cmd: &[&str]) -> Result<()> {
