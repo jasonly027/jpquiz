@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import appCss from '../styles/app.css?url';
+import { NotFound } from './-404';
 import { QueryClientProvider } from '@/components/hooks/QueryClientProvider';
 import { ThemeProvider } from '@/components/hooks/ThemeProvider';
 import {
@@ -32,6 +33,7 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
+  notFoundComponent: NotFound,
 });
 
 function RootComponent() {

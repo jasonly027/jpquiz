@@ -61,9 +61,5 @@ function RouteComponent() {
     }
   })();
 
-  return (
-    <InGameLayout title="Multiple Choice">
-      <div className="mx-4 flex justify-center">{content}</div>
-    </InGameLayout>
-  );
+  return <InGameLayout title="Multiple Choice">{content}</InGameLayout>;
 }
