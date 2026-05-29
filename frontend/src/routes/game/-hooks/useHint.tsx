@@ -55,13 +55,13 @@ function createHint(value: string, showHiragana: boolean) {
 }
 
 function shouldShow(c: string, showHiragana: boolean) {
-  return !isAlpha(c) || (showHiragana && isHiraganaChar(c));
+  return isSpecialChar(c) || (showHiragana && isHiraganaChar(c));
 }
 
-function isAlpha(c: string): boolean {
-  return alphaCharMatcher.test(c);
+function isSpecialChar(c: string): boolean {
+  return specialCharMatcher.test(c);
 }
-const alphaCharMatcher = /^[a-zA-Z]$/;
+const specialCharMatcher = /^[,.?!()\-[\];'"/\\:@#$%&*+=<>{}|~`^_]$/;
 
 function isHiraganaChar(c: string): boolean {
   return hiraganaCharMatcher.test(c);
