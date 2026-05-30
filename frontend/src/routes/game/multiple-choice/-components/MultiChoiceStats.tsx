@@ -10,9 +10,9 @@ import {
   StatsRowJishoButton,
   StatsRowQuestionCounter,
 } from '../../-components/Stats';
+import { WordPairSolution } from '../../-components/WordPairStats';
 import type { QuizMeta, QuizPostState } from '../../-hooks/useQuiz';
 import type { QuestionStat } from '../../-lib/models';
-import { getGameChoicesFont, getGamePromptFont } from '../../-lib/utils';
 import { useGetMultiChoice } from '@/api/server';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,10 +22,7 @@ import {
 } from '@/components/ui/collapsible';
 import { Spinner } from '@/components/ui/spinner';
 import type { MultiChoiceQuestion } from '@/lib/models';
-import {
-  ArrowDataTransferVerticalIcon,
-  ArrowDownIcon,
-} from '@hugeicons/core-free-icons';
+import { ArrowDownIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { isAxiosError } from 'axios';
 import { useState } from 'react';
@@ -135,7 +132,11 @@ function MultiChoiceStatsRow({ idx, stats, meta }: MultiChoiceStatsRowProps) {
       <StatsRow>
         <StatsRowQuestionCounter count={idx + 1} />
 
-        <StatsRowSolution stats={stats} meta={meta} />
+        <WordPairSolution
+          prompt={stats.source.prompt}
+          answer={stats.source.choices[stats.source.answer_idx]!}
+          meta={meta}
+        />
 
         <StatsRowGenericStats stats={stats} />
 
@@ -165,31 +166,5 @@ function MultiChoiceStatsRow({ idx, stats, meta }: MultiChoiceStatsRowProps) {
         <StatsRowDetails wordPair={stats.source.word_pair} />
       </CollapsibleContent>
     </Collapsible>
-  );
-}
-
-interface StatsRowSolutionProps {
-  stats: QuestionStat<MultiChoiceQuestion>;
-  meta: QuizMeta<MultiChoiceQuestion>;
-}
-
-function StatsRowSolution({ stats, meta }: StatsRowSolutionProps) {
-  return (
-    <div className="flex grow flex-col gap-4 py-3 text-center text-sm font-semibold">
-      <div className={`${getGamePromptFont(meta.mode)} px-3`}>
-        {stats.source.prompt}
-      </div>
-      <div className="flex justify-center bg-background/50 p-3">
-        <HugeiconsIcon
-          icon={ArrowDataTransferVerticalIcon}
-          size={20}
-          strokeWidth={1.5}
-          className="text-muted-foreground"
-        />
-      </div>
-      <div className={`${getGameChoicesFont(meta.mode)} px-3`}>
-        {stats.source.choices[stats.source.answer_idx]}
-      </div>
-    </div>
   );
 }
