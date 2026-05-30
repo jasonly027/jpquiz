@@ -64,7 +64,7 @@ export function CreateFreeResponseGame({
     <Card variant="outline" className="w-full max-w-xl">
       <CardContent>
         <form onSubmit={onSubmit}>
-          <FieldSet className="grow">
+          <FieldSet>
             <FieldLegend className="w-full text-center font-semibold">
               Create a Game
             </FieldLegend>

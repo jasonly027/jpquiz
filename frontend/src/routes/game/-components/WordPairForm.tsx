@@ -24,32 +24,21 @@ import { Spinner } from '@/components/ui/spinner';
 import type { GameMode, NLevel, PartOfSpeechCategory } from '@/lib/models';
 import { cn } from '@/lib/utils';
 import type { ComponentProps, Dispatch, SetStateAction } from 'react';
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 
-const GAME_MODES: { name: string; value: GameMode }[] = [
+type GameModePart = 'eng' | 'kanji' | 'kana';
+const GAME_MODE_PARTS: { name: string; value: GameModePart }[] = [
   {
-    name: 'English to Kana',
-    value: 'engtokana',
+    name: 'English',
+    value: 'eng',
   },
   {
-    name: 'English to Kanji',
-    value: 'engtokanji',
+    name: 'Kanji',
+    value: 'kanji',
   },
   {
-    name: 'Kana to English',
-    value: 'kanatoeng',
-  },
-  {
-    name: 'Kana to Kanji',
-    value: 'kanatokanji',
-  },
-  {
-    name: 'Kanji to English',
-    value: 'kanjitoeng',
-  },
-  {
-    name: 'Kanji to Kana',
-    value: 'kanjitokana',
+    name: 'Kana',
+    value: 'kana',
   },
 ];
 
@@ -58,26 +47,62 @@ export function FieldGameMode({
 }: {
   setMode: Dispatch<SetStateAction<GameMode | undefined>>;
 }) {
-  const id = useId();
+  const [prompt, setPrompt] = useState<GameModePart>();
+  const [answer, setAnswer] = useState<GameModePart>();
+
+  const onPromptChange = (v: GameModePart) => {
+    setPrompt(v);
+    if (v === answer) {
+      setAnswer(undefined);
+      setMode(undefined);
+      return;
+    }
+    if (answer !== undefined) {
+      setMode((v + 'to' + answer) as GameMode);
+    }
+  };
+
+  const onAnswerChange = (v: GameModePart) => {
+    setAnswer(v);
+    if (v === prompt) {
+      setPrompt(undefined);
+      setMode(undefined);
+      return;
+    }
+    if (prompt !== undefined) {
+      setMode((prompt + 'to' + v) as GameMode);
+    }
+  };
 
   return (
     <Field orientation="responsive">
-      <FieldLabel htmlFor={id} className="flex-1 text-nowrap">
-        Game Mode
-      </FieldLabel>
+      <FieldLabel className="flex-1 text-nowrap">Game Mode</FieldLabel>
 
-      <div>
-        <Select
-          name="mode"
-          onValueChange={(v) => setMode(v as GameMode)}
-          required
-        >
-          <SelectTrigger id={id}>
-            <SelectValue placeholder="Select Game Mode" />
+      <div className="flex items-baseline gap-3">
+        <Select value={prompt ?? ''} onValueChange={onPromptChange} required>
+          <SelectTrigger className="min-w-24.5">
+            <SelectValue placeholder="Prompt" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {GAME_MODES.map(({ name, value }) => (
+              {GAME_MODE_PARTS.map(({ name, value }) => (
+                <SelectItem key={value} value={value}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <span>to</span>
+
+        <Select value={answer ?? ''} onValueChange={onAnswerChange} required>
+          <SelectTrigger className="min-w-24.5">
+            <SelectValue placeholder="Answer" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {GAME_MODE_PARTS.map(({ name, value }) => (
                 <SelectItem key={value} value={value}>
                   {name}
                 </SelectItem>
