@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 
 export interface UseHintOptions {
-  showHiragana?: boolean;
   minRemaining?: number;
+  autoRevealFilters?: ((ch: string, idx: number) => boolean)[];
 }
 
 export interface UseHintValue {
@@ -13,11 +13,12 @@ export interface UseHintValue {
 const CENSOR_STR = '_';
 
 export function useHint(value: string, opts?: UseHintOptions): UseHintValue {
-  const { showHiragana = false, minRemaining = 0 } = opts ?? {};
+  const { minRemaining = 0, autoRevealFilters = [] } = opts ?? {};
+  autoRevealFilters.push(isSpecialChar);
 
   const original = useRef(value);
 
-  const [hint, setHint] = useState(() => createHint(value, showHiragana));
+  const [hint, setHint] = useState(() => createHint(value, autoRevealFilters));
 
   const revealOne = () => {
     setHint((prev) => {
@@ -45,25 +46,29 @@ export function useHint(value: string, opts?: UseHintOptions): UseHintValue {
   };
 }
 
-function createHint(value: string, showHiragana: boolean) {
+function createHint(
+  value: string,
+  autoRevealFilters: NonNullable<UseHintOptions['autoRevealFilters']>
+) {
   return value
     .split('')
-    .map((c) => {
-      return shouldShow(c, showHiragana) ? c : CENSOR_STR;
+    .map((c, idx) => {
+      for (const filter of autoRevealFilters) {
+        if (filter(c, idx)) {
+          return c;
+        }
+      }
+      return CENSOR_STR;
     })
     .join('');
-}
-
-function shouldShow(c: string, showHiragana: boolean) {
-  return isSpecialChar(c) || (showHiragana && isHiraganaChar(c));
 }
 
 function isSpecialChar(c: string): boolean {
   return specialCharMatcher.test(c);
 }
-const specialCharMatcher = /^[,.?!()\-[\];'"/\\:@#$%&*+=<>{}|~`^_]$/;
+const specialCharMatcher = /^[ ,.?!()\-[\];'"/\\:@#$%&*+=<>{}|~`^_]$/;
 
-function isHiraganaChar(c: string): boolean {
+export function isHiraganaChar(c: string): boolean {
   return hiraganaCharMatcher.test(c);
 }
 const hiraganaCharMatcher = /^[\u3041-\u3096]$/;

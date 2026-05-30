@@ -117,7 +117,7 @@ export function FieldNLevel({
         >
           <ComboboxChips ref={levelsAnchor}>
             <ComboboxValue>
-              {(levels: typeof N_LEVELS) => (
+              {(levels: NLevel[]) => (
                 <React.Fragment>
                   {levels.map((level) => (
                     <ComboboxChip key={level} showRemove={false}>
@@ -136,7 +136,7 @@ export function FieldNLevel({
           <ComboboxContent anchor={levelsAnchor}>
             <ComboboxEmpty>No NLevel found.</ComboboxEmpty>
             <ComboboxList>
-              {(item) => (
+              {(item: NLevel) => (
                 <ComboboxItem key={item} value={item}>
                   {item}
                 </ComboboxItem>

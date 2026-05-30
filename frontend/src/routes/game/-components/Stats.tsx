@@ -154,7 +154,9 @@ export function StatsRowGenericStats({ stats }: StatsRowGenericStatsProps) {
         data-skipped={isFinite(stats.guesses)}
         className="min-w-26 data-skipped:italic"
       >
-        {isFinite(stats.guesses) ? `${stats.guesses} Guesses` : 'Skipped'}
+        {isFinite(stats.guesses)
+          ? `${stats.guesses.toString()} Guesses`
+          : 'Skipped'}
       </div>
       <div>{stats.elapsed}s</div>
     </div>

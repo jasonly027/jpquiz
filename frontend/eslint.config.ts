@@ -13,14 +13,14 @@ const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url));
 
 export default defineConfig([
   includeIgnoreFile(gitignorePath, 'Imported .gitignore patterns'),
-  globalIgnores(['./src/api/*']),
+  globalIgnores(['./src/api/*', './src/components/ui/*']),
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     plugins: { js },
     extends: ['js/recommended'],
     languageOptions: { globals: globals.browser },
   },
-  tseslint.configs.strict,
+  tseslint.configs.strictTypeChecked,
   {
     ...pluginReact.configs.flat['recommended'],
     settings: {
@@ -34,8 +34,15 @@ export default defineConfig([
   reactCompiler.configs.recommended,
   pluginQuery.configs['flat/recommended-strict'],
   {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+      },
+    },
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'off',
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
     },
   },
 ]);

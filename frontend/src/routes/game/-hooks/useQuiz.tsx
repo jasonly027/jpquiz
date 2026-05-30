@@ -9,7 +9,7 @@ export type UseQuizValue<T> =
 
 export interface QuizPreState<T> {
   state: 'pre';
-  initQuiz(data: QuizMeta<T>): void;
+  initQuiz: (data: QuizMeta<T>) => void;
 }
 
 export interface QuizInState<T> {
@@ -17,15 +17,15 @@ export interface QuizInState<T> {
   question: Readonly<T>;
   currentIndex: number;
   meta: Readonly<QuizMeta<T>>;
-  submitAnswer(stat: QuestionStat<T>): void;
-  endQuiz(): void;
+  submitAnswer: (stat: QuestionStat<T>) => void;
+  endQuiz: () => void;
 }
 
 export interface QuizPostState<T> {
   state: 'post';
   meta: Readonly<QuizMeta<T>>;
   stats: QuestionStat<T>[];
-  initQuiz(data: QuizMeta<T>): void;
+  initQuiz: (data: QuizMeta<T>) => void;
   reset: () => void;
 }
 
@@ -45,15 +45,13 @@ export function useQuiz<T>(): UseQuizValue<T> {
   const isComplete =
     meta !== undefined && currentIndex >= meta.questions.length;
 
-  const initQuiz = (meta: QuizMeta<T>) => {
+  const initQuiz: QuizPreState<T>['initQuiz'] = (meta) => {
     setMeta(meta);
     setCurrentIndex(0);
     setStats([]);
   };
 
-  const submitAnswer = (
-    stat: Parameters<QuizInState<T>['submitAnswer']>[0]
-  ) => {
+  const submitAnswer: QuizInState<T>['submitAnswer'] = (stat) => {
     if (isComplete) return;
     setStats((prev) => [...prev, stat]);
     setCurrentIndex((prev) => prev + 1);

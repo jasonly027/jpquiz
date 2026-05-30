@@ -19,9 +19,12 @@ import type { ComponentProps } from 'react';
 export interface HintBoxProps {
   hint: string;
   mode: GameMode;
+  mutedMask?: boolean[];
 }
 
-export function HintBox({ hint, mode }: HintBoxProps) {
+export function HintBox({ hint, mode, mutedMask }: HintBoxProps) {
+  console.log(mutedMask);
+
   return (
     <div className="flex w-full flex-col items-center justify-center rounded-lg bg-background px-3 pt-2 pb-4 ring ring-foreground/15">
       <div className="flex items-baseline gap-0.5">
@@ -48,7 +51,13 @@ export function HintBox({ hint, mode }: HintBoxProps) {
         className={`${getGameChoicesFont(mode)} flex gap-1 text-xl select-none`}
       >
         {hint.split('').map((c, idx) => (
-          <span key={idx}>{c === ' ' ? <>&nbsp;&nbsp;</> : c}</span>
+          <span
+            key={idx}
+            data-muted={mutedMask?.[idx]}
+            className="data-[muted=true]:text-muted-foreground"
+          >
+            {c === ' ' ? <>&nbsp;&nbsp;</> : c}
+          </span>
         ))}
       </div>
     </div>

@@ -52,6 +52,19 @@ export function isJapaneseChoices(mode: GameMode) {
   }
 }
 
+export function isKanjiChoices(mode: GameMode) {
+  switch (mode) {
+    case 'engtokanji':
+    case 'kanatokanji':
+      return true;
+    case 'engtokana':
+    case 'kanatoeng':
+    case 'kanjitokana':
+    case 'kanjitoeng':
+      return false;
+  }
+}
+
 export function getGamePromptFont(mode: GameMode) {
   return isJapanesePrompt(mode)
     ? 'font-game-jp font-normal'

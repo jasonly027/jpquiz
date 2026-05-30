@@ -21,7 +21,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Spinner } from '@/components/ui/spinner';
-import type { FreeResponseQuestion } from '@/lib/models';
+import { FreeResponseQuestion } from '@/lib/models';
 import {
   ArrowDataTransferVerticalIcon,
   ArrowDownIcon,
@@ -45,7 +45,7 @@ export function FreeResponseStats({
         { params: { mode, levels, pos: categories } }
       ) {
         initQuiz({
-          questions,
+          questions: questions.map((q) => new FreeResponseQuestion(q)),
           mode,
           levels,
           categories,

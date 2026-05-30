@@ -8,11 +8,11 @@ import type { QuizPreState } from '../../-hooks/useQuiz';
 import { useGetFreeResponse } from '@/api/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { FieldGroup, FieldLegend, FieldSet } from '@/components/ui/field';
-import type {
+import {
   FreeResponseQuestion,
-  GameMode,
-  NLevel,
-  PartOfSpeechCategory,
+  type GameMode,
+  type NLevel,
+  type PartOfSpeechCategory,
 } from '@/lib/models';
 import { isAxiosError } from 'axios';
 import { useState, type SubmitEventHandler } from 'react';
@@ -33,7 +33,7 @@ export function CreateFreeResponseGame({
         { params: { mode, levels, pos: categories } }
       ) {
         initQuiz({
-          questions,
+          questions: questions.map((q) => new FreeResponseQuestion(q)),
           mode,
           levels,
           categories,

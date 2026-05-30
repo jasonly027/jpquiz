@@ -7,14 +7,27 @@ import {
   WordPairCardActions,
   WordPairStatBar,
 } from '../../-components/WordPairGame';
-import { useHint } from '../../-hooks/useHint';
+import {
+  isHiraganaChar,
+  useHint,
+  type UseHintOptions,
+  type UseHintValue,
+} from '../../-hooks/useHint';
 import type { QuizInState } from '../../-hooks/useQuiz';
 import { useShowHint } from '../../-hooks/useShowHint';
 import { useTimer } from '../../-hooks/useTimer';
-import { getGameChoicesFont, getGamePromptFont } from '../../-lib/utils';
+import {
+  getGameChoicesFont,
+  getGamePromptFont,
+  isKanjiChoices,
+} from '../../-lib/utils';
 import { Input } from '@/components/ui/input';
-import type { FreeResponseQuestion } from '@/lib/models';
-import { useRef, useState } from 'react';
+import {
+  getCommentedMask,
+  type FreeResponseQuestion,
+  type GameMode,
+} from '@/lib/models';
+import { useMemo, useRef, useState } from 'react';
 
 export type FreeResponseGameProps = QuizInState<FreeResponseQuestion>;
 
@@ -28,21 +41,16 @@ export function FreeResponseGame({
   const [guesses, setGuesses] = useState(0);
   const elapsedSecs = useTimer();
 
-  const isKanjiResponse =
-    meta.mode === 'engtokanji' || meta.mode === 'kanatokanji';
-  const { hint, revealOne } = useHint(question.answers[0]!, {
-    minRemaining: 1,
-    showHiragana: isKanjiResponse,
-  });
-  const [showHint] = useShowHint();
+  const { hint, revealOne, showHint, hintCommentMask } = useFreeResponseHint(
+    question.answers[0]!,
+    meta.mode
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
-
   const onGuess = () => {
     if (!inputRef.current?.value) return;
 
-    const isCorrect = question.answers.includes(inputRef.current.value);
-    if (isCorrect) {
+    if (question.isAnswer(inputRef.current.value.trim())) {
       submitAnswer({
         guesses: guesses + 1,
         elapsed: elapsedSecs,
@@ -82,7 +90,13 @@ export function FreeResponseGame({
             >
               {question.prompt}
             </div>
-            {showHint && <HintBox hint={hint} mode={meta.mode} />}
+            {showHint && (
+              <HintBox
+                hint={hint}
+                mode={meta.mode}
+                mutedMask={hintCommentMask}
+              />
+            )}
           </div>
         </WordPairCardContent>
 
@@ -113,4 +127,39 @@ export function FreeResponseGame({
       </div>
     </div>
   );
+}
+
+interface UseFreeResponseHintValue extends UseHintValue {
+  showHint: boolean;
+  hintCommentMask: boolean[];
+}
+
+function useFreeResponseHint(
+  hintTarget: string,
+  mode: GameMode
+): UseFreeResponseHintValue {
+  const hintCommentMask = useMemo(
+    () => getCommentedMask(hintTarget),
+    [hintTarget]
+  );
+
+  const autoRevealFilters: UseHintOptions['autoRevealFilters'] = [];
+  if (isKanjiChoices(mode)) {
+    autoRevealFilters.push(isHiraganaChar);
+  }
+  autoRevealFilters.push((_, idx) => !!hintCommentMask[idx]);
+
+  const { hint, revealOne } = useHint(hintTarget, {
+    minRemaining: 1,
+    autoRevealFilters,
+  });
+
+  const [showHint] = useShowHint();
+
+  return {
+    hint,
+    revealOne,
+    showHint,
+    hintCommentMask,
+  };
 }
