@@ -23,8 +23,6 @@ export interface HintBoxProps {
 }
 
 export function HintBox({ hint, mode, mutedMask }: HintBoxProps) {
-  console.log(mutedMask);
-
   return (
     <div className="flex w-full flex-col items-center justify-center rounded-lg bg-background px-3 pt-2 pb-4 ring ring-foreground/15">
       <div className="flex items-baseline gap-0.5">

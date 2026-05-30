@@ -20,20 +20,20 @@ export function WordPairSolution({
   meta,
 }: StatsRowSolutionProps) {
   return (
-    <div className="flex grow flex-col items-center justify-center gap-3 p-3 text-center text-lg sm:flex-row">
+    <div className="flex grow flex-col items-center justify-center gap-3 p-3 text-center text-lg lg:flex-row">
       <TextCard className={getGamePromptFont(meta.mode)}>{prompt}</TextCard>
       <div className="flex justify-center rounded-full bg-background/50 p-1.5 ring ring-foreground/15">
         <HugeiconsIcon
           icon={ArrowDataTransferHorizontalIcon}
           size={20}
           strokeWidth={1.5}
-          className="hidden text-muted-foreground sm:block"
+          className="hidden text-muted-foreground lg:block"
         />
         <HugeiconsIcon
           icon={ArrowDataTransferVerticalIcon}
           size={20}
           strokeWidth={1.5}
-          className="text-muted-foreground sm:hidden"
+          className="text-muted-foreground lg:hidden"
         />
       </div>
       <TextCard className={getGameChoicesFont(meta.mode)}>{answer}</TextCard>

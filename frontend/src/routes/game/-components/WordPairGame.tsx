@@ -11,6 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  N_LEVELS,
+  POS_CATEGORIES,
+  POS_VIEW,
+  type NLevel,
+  type PartOfSpeechCategory,
+} from '@/lib/models';
 import { cn } from '@/lib/utils';
 import {
   ArrowRightDoubleIcon,
@@ -18,6 +25,53 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import type { ComponentProps } from 'react';
+
+export interface WordPairCurrentSettingsProps {
+  levels: NLevel[];
+  categories: PartOfSpeechCategory[];
+  cardClassName?: string;
+  contentClassName?: string;
+}
+
+export function WordPairCurrentSettings({
+  levels,
+  categories,
+  cardClassName,
+  contentClassName,
+}: WordPairCurrentSettingsProps) {
+  return (
+    <Card size="sm" className={cardClassName}>
+      <CardContent
+        className={cn(
+          'flex flex-col justify-between gap-4 sm:flex-row sm:gap-1',
+          contentClassName
+        )}
+      >
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {N_LEVELS.filter((l) => levels.includes(l)).map((l) => (
+            <span
+              key={l}
+              className="rounded-lg px-2 py-1 ring ring-foreground/15"
+            >
+              {l}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {POS_CATEGORIES.filter((c) => categories.includes(c)).map((c) => (
+            <span
+              key={c}
+              className="rounded-lg px-2 py-1 ring ring-foreground/15"
+            >
+              {POS_VIEW[c]}
+            </span>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export interface WordPairStatBarProps {
   guesses: number;
@@ -40,7 +94,11 @@ export function WordPairStatBar({ guesses, seconds }: WordPairStatBarProps) {
 }
 
 export function WordPairCard({ children }: { children?: React.ReactNode }) {
-  return <Card className="min-h-80 justify-center gap-1 py-2">{children}</Card>;
+  return (
+    <Card size="sm" className="min-h-80 justify-center py-2">
+      {children}
+    </Card>
+  );
 }
 
 export function WordPairCardActions({

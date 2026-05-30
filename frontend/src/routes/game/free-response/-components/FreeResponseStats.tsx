@@ -10,6 +10,7 @@ import {
   StatsRowJishoButton,
   StatsRowQuestionCounter,
 } from '../../-components/Stats';
+import { WordPairCurrentSettings } from '../../-components/WordPairGame';
 import { WordPairSolution } from '../../-components/WordPairStats';
 import type { QuizMeta, QuizPostState } from '../../-hooks/useQuiz';
 import type { QuestionStat } from '../../-lib/models';
@@ -93,22 +94,31 @@ export function FreeResponseStats({
           </Button>
         </div>
 
+        <WordPairCurrentSettings
+          levels={meta.levels}
+          categories={meta.categories}
+          cardClassName="bg-transparent ring-0 p-0.5 -mb-2"
+          contentClassName="px-0!"
+        />
+
         {getGame.error && (
           <div className="-mt-4 text-center text-destructive">
             {getGameError}
           </div>
         )}
 
-        <StatsRowContainer>
-          {stats.map((stats, idx) => (
-            <FreeResponseStatsRow
-              key={idx}
-              idx={idx}
-              stats={stats}
-              meta={meta}
-            />
-          ))}
-        </StatsRowContainer>
+        {stats.length >= 1 && (
+          <StatsRowContainer>
+            {stats.map((stats, idx) => (
+              <FreeResponseStatsRow
+                key={idx}
+                idx={idx}
+                stats={stats}
+                meta={meta}
+              />
+            ))}
+          </StatsRowContainer>
+        )}
       </StatsContent>
     </Stats>
   );

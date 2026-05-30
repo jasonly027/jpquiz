@@ -6,6 +6,7 @@ import {
   WordPairCardContent,
   WordPairCardActions,
   WordPairStatBar,
+  WordPairCurrentSettings,
 } from '../../-components/WordPairGame';
 import {
   isHiraganaChar,
@@ -73,7 +74,12 @@ export function FreeResponseGame({
   };
 
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-1 font-semibold">
+    <div className="flex w-full max-w-6xl flex-col gap-3 font-semibold">
+      <WordPairCurrentSettings
+        levels={meta.levels}
+        categories={meta.categories}
+      />
+
       <WordPairStatBar guesses={guesses} seconds={elapsedSecs} />
 
       <WordPairCard>
@@ -109,7 +115,7 @@ export function FreeResponseGame({
         </WordPairCardActions>
       </WordPairCard>
 
-      <div className="mt-1.5">
+      <div>
         <form
           onSubmit={(e) => {
             e.preventDefault();

@@ -1,4 +1,3 @@
-import peepoNotes from '../../peeponotes.webp';
 import { useTheme } from '../hooks/ThemeProvider';
 import { Button } from '../ui/button';
 import {
@@ -33,11 +32,6 @@ export function SideBar() {
         </nav>
 
         <div className="mt-auto flex justify-end">
-          <img
-            src={peepoNotes}
-            alt="peepoNotes"
-            className="mr-auto size-10 animate-spin"
-          />
           <ThemeToggleButton />
         </div>
       </div>

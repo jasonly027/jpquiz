@@ -5,6 +5,7 @@ import {
   WordPairCardContent,
   WordPairCardActions,
   WordPairStatBar,
+  WordPairCurrentSettings,
 } from '../../-components/WordPairGame';
 import type { QuizInState } from '../../-hooks/useQuiz';
 import { useTimer } from '../../-hooks/useTimer';
@@ -49,7 +50,12 @@ export function MultiChoiceGame({
   };
 
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-1 font-semibold">
+    <div className="flex w-full max-w-6xl flex-col gap-3 font-semibold">
+      <WordPairCurrentSettings
+        levels={meta.levels}
+        categories={meta.categories}
+      />
+
       <WordPairStatBar guesses={guesses} seconds={elapsedSecs} />
 
       <WordPairCard>
@@ -77,7 +83,7 @@ export function MultiChoiceGame({
         </WordPairCardActions>
       </WordPairCard>
 
-      <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {question.choices.map((choice, idx) => (
           <OnceButton
             key={idx}

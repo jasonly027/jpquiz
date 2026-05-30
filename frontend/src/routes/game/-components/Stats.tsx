@@ -87,7 +87,7 @@ export interface StatsContentProps {
 
 export function StatsContent({ children }: StatsContentProps) {
   return (
-    <Card variant="outline" className="flex w-full max-w-4xl flex-col">
+    <Card variant="outline" className="flex w-full max-w-5xl flex-col">
       <CardHeader>
         <h2 className="text-center text-base font-semibold">Quiz Results</h2>
       </CardHeader>

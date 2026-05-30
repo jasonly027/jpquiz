@@ -9,11 +9,39 @@ import {
 
 export type NLevel = NLevelDto;
 
+export const N_LEVELS = [
+  'N1',
+  'N2',
+  'N3',
+  'N4',
+  'N5',
+] as const satisfies readonly NLevel[];
+
 export type GameMode = GameModeDto;
 
 export type WordPair = WordDto;
 
 export type PartOfSpeechCategory = PartOfSpeechCategoryDto;
+
+export const POS_CATEGORIES = [
+  'nouns',
+  'verbs',
+  'adjectives',
+  'adverbs',
+  'expressions',
+  'conjunctions',
+  'other',
+] as const satisfies readonly PartOfSpeechCategory[];
+
+export const POS_VIEW: Readonly<Record<PartOfSpeechCategory, string>> = {
+  nouns: 'Nouns',
+  verbs: 'Verbs',
+  adjectives: 'Adjectives',
+  adverbs: 'Adverbs',
+  expressions: 'Expressions',
+  conjunctions: 'Conjunctions',
+  other: 'Other',
+};
 
 export type MultiChoiceQuestion = MultiChoiceQuestionDto;
 

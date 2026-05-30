@@ -21,26 +21,25 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
-import type { GameMode, NLevel, PartOfSpeechCategory } from '@/lib/models';
+import {
+  POS_CATEGORIES,
+  N_LEVELS,
+  type GameMode,
+  type NLevel,
+  type PartOfSpeechCategory,
+  POS_VIEW,
+} from '@/lib/models';
 import { cn } from '@/lib/utils';
 import type { ComponentProps, Dispatch, SetStateAction } from 'react';
 import React, { useId, useState } from 'react';
 
-type GameModePart = 'eng' | 'kanji' | 'kana';
-const GAME_MODE_PARTS: { name: string; value: GameModePart }[] = [
-  {
-    name: 'English',
-    value: 'eng',
-  },
-  {
-    name: 'Kanji',
-    value: 'kanji',
-  },
-  {
-    name: 'Kana',
-    value: 'kana',
-  },
-];
+type GameModePart = (typeof GAME_MODE_PARTS)[number];
+const GAME_MODE_PARTS = ['eng', 'kanji', 'kana'] as const;
+const GAME_MODE_PARTS_VIEW: Readonly<Record<GameModePart, string>> = {
+  eng: 'English',
+  kanji: 'Kanji',
+  kana: 'Kana',
+};
 
 export function FieldGameMode({
   setMode,
@@ -79,15 +78,15 @@ export function FieldGameMode({
       <FieldLabel className="flex-1 text-nowrap">Game Mode</FieldLabel>
 
       <div className="flex items-baseline gap-3">
-        <Select value={prompt ?? ''} onValueChange={onPromptChange} required>
+        <Select value={prompt ?? ''} onValueChange={onPromptChange}>
           <SelectTrigger className="min-w-24.5">
             <SelectValue placeholder="Prompt" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {GAME_MODE_PARTS.map(({ name, value }) => (
-                <SelectItem key={value} value={value}>
-                  {name}
+              {GAME_MODE_PARTS.map((mode) => (
+                <SelectItem key={mode} value={mode}>
+                  {GAME_MODE_PARTS_VIEW[mode]}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -96,15 +95,15 @@ export function FieldGameMode({
 
         <span>to</span>
 
-        <Select value={answer ?? ''} onValueChange={onAnswerChange} required>
+        <Select value={answer ?? ''} onValueChange={onAnswerChange}>
           <SelectTrigger className="min-w-24.5">
             <SelectValue placeholder="Answer" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {GAME_MODE_PARTS.map(({ name, value }) => (
-                <SelectItem key={value} value={value}>
-                  {name}
+              {GAME_MODE_PARTS.map((mode) => (
+                <SelectItem key={mode} value={mode}>
+                  {GAME_MODE_PARTS_VIEW[mode]}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -114,8 +113,6 @@ export function FieldGameMode({
     </Field>
   );
 }
-
-const N_LEVELS = ['N1', 'N2', 'N3', 'N4', 'N5'] as const satisfies NLevel[];
 
 export function FieldNLevel({
   setLevels,
@@ -174,16 +171,6 @@ export function FieldNLevel({
   );
 }
 
-const CATEGORIES: { name: string; value: PartOfSpeechCategory }[] = [
-  { name: 'Nouns', value: 'nouns' },
-  { name: 'Verbs', value: 'verbs' },
-  { name: 'Adjectives', value: 'adjectives' },
-  { name: 'Adverbs', value: 'adverbs' },
-  { name: 'Expressions', value: 'expressions' },
-  { name: 'Conjunctions', value: 'conjunctions' },
-  { name: 'Other', value: 'other' },
-];
-
 export function FieldCategory({
   setCategories,
 }: {
@@ -201,22 +188,20 @@ export function FieldCategory({
       <div className="max-w-58 flex-1/4">
         <Combobox
           id={id}
-          items={CATEGORIES}
-          onValueChange={(c: typeof CATEGORIES) =>
-            setCategories(c.map(({ value }) => value))
-          }
+          items={POS_CATEGORIES}
+          onValueChange={(c: PartOfSpeechCategory[]) => setCategories(c)}
           multiple
           autoHighlight
           required
         >
           <ComboboxChips ref={anchor}>
             <ComboboxValue>
-              {(categories: typeof CATEGORIES) => (
+              {(categories: PartOfSpeechCategory[]) => (
                 <React.Fragment>
-                  {categories.map(({ name, value }) => {
+                  {categories.map((c) => {
                     return (
-                      <ComboboxChip key={value} showRemove={false}>
-                        {name}
+                      <ComboboxChip key={c} showRemove={false}>
+                        {POS_VIEW[c]}
                       </ComboboxChip>
                     );
                   })}
@@ -234,9 +219,9 @@ export function FieldCategory({
           <ComboboxContent anchor={anchor}>
             <ComboboxEmpty>No category found.</ComboboxEmpty>
             <ComboboxList>
-              {(category: (typeof CATEGORIES)[number]) => (
-                <ComboboxItem key={category.value} value={category}>
-                  {category.name}
+              {(c: PartOfSpeechCategory) => (
+                <ComboboxItem key={c} value={c}>
+                  {POS_VIEW[c]}
                 </ComboboxItem>
               )}
             </ComboboxList>
